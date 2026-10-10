@@ -1,0 +1,13 @@
+{
+  "format": "jammy-puppy-cinema-backup",
+  "version": 1,
+  "exportedAt": "2026-10-10T13:22:37.792Z",
+  "origin": "http://127.0.0.1:4173",
+  "baseCodeCommit": "6b5eeed344971bfea21b3dc05ddfcb39ec46023c",
+  "storage": {
+    "gongying.addedFilms.v1": null,
+    "gongying.filmEdits.v1": null,
+    "gongying.deletedFilms.v1": null,
+    "gongying.hiddenColumns": "[\"language\",\"media\"]"
+  }
+}

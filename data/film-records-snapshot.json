@@ -1,0 +1,250 @@
+{
+  "format": "jammy-puppy-cinema-film-snapshot",
+  "version": 1,
+  "films": [
+    {
+      "id": 1,
+      "title": "戏梦巴黎",
+      "en": "The Dreamers",
+      "year": 2003,
+      "type": "电影",
+      "genre": "剧情 / 爱情",
+      "art": "city",
+      "status": "watched",
+      "by": "—",
+      "date": "8 月 23 日",
+      "watchedDates": [
+        "2026-08-23"
+      ],
+      "scores": null,
+      "director": "贝纳尔多·贝托鲁奇",
+      "language": "英语 / 法语"
+    },
+    {
+      "id": 2,
+      "title": "色戒",
+      "en": "Lust, Caution",
+      "year": 2007,
+      "type": "电影",
+      "genre": "待补充",
+      "art": "orange",
+      "status": "watched",
+      "by": "—",
+      "date": "8 月 28 日、8 月 29 日",
+      "watchedDates": [
+        "2026-08-28",
+        "2026-08-29"
+      ],
+      "scores": null,
+      "director": "李安",
+      "nameSourceUrl": "https://www.focusfeatures.com/lust__caution",
+      "nameSourceLabel": "Focus Features · 英文发行名"
+    },
+    {
+      "id": 3,
+      "title": "冰风暴",
+      "en": "The Ice Storm",
+      "year": 1997,
+      "type": "电影",
+      "genre": "待补充",
+      "art": "forest",
+      "status": "watched",
+      "by": "—",
+      "date": "8 月 26 日",
+      "watchedDates": [
+        "2026-08-26"
+      ],
+      "scores": null
+    },
+    {
+      "id": 4,
+      "title": "太阳伞",
+      "en": "太阳伞",
+      "year": 2005,
+      "type": "电影",
+      "genre": "待补充",
+      "art": "sea",
+      "status": "watched",
+      "by": "—",
+      "date": "9 月 15 日",
+      "watchedDates": [
+        "2026-09-15"
+      ],
+      "scores": null,
+      "director": "哈斯朝鲁",
+      "nameSourceUrl": "https://m.1905.com/m/star/workslist/2372204/?fr=shipsj",
+      "nameSourceLabel": "电影网 · 中文原名（未核实英文名）"
+    },
+    {
+      "id": 5,
+      "title": "老男孩",
+      "en": "올드보이",
+      "year": 2003,
+      "type": "电影",
+      "genre": "待补充",
+      "art": "space",
+      "status": "watched",
+      "by": "—",
+      "date": "9 月 26 日",
+      "watchedDates": [
+        "2026-09-26"
+      ],
+      "scores": null,
+      "director": "朴赞郁"
+    },
+    {
+      "id": 6,
+      "title": "攻壳机动队",
+      "en": "攻殻機動隊",
+      "year": 1995,
+      "type": "动漫",
+      "genre": "动作 / 科幻 / 动画",
+      "art": "city",
+      "status": "watched",
+      "by": "—",
+      "date": "10 月 3 日",
+      "watchedDates": [
+        "2026-10-03"
+      ],
+      "scores": null,
+      "director": "押井守",
+      "language": "日语"
+    },
+    {
+      "id": 7,
+      "title": "登堂入室",
+      "en": "Dans la maison / In the House",
+      "year": 2012,
+      "type": "电影",
+      "genre": "待补充",
+      "art": "orange",
+      "status": "watched",
+      "by": "—",
+      "date": "10 月 5 日",
+      "watchedDates": [
+        "2026-10-05"
+      ],
+      "scores": null,
+      "director": "François Ozon",
+      "nameSourceUrl": "https://en.wikipedia.org/wiki/In_the_House_(film)",
+      "nameSourceLabel": "维基百科 · 法文原名 / 英文名"
+    },
+    {
+      "id": 8,
+      "title": "分手的决心",
+      "en": "Decision to Leave",
+      "year": 2022,
+      "type": "电影",
+      "genre": "剧情 / 悬疑 / 犯罪",
+      "art": "forest",
+      "status": "watched",
+      "by": "—",
+      "date": "10 月 5 日",
+      "watchedDates": [
+        "2026-10-05"
+      ],
+      "scores": null,
+      "director": "朴赞郁",
+      "language": "韩语 / 汉语普通话",
+      "nameSourceUrl": "https://en.wikipedia.org/wiki/Decision_to_Leave",
+      "nameSourceLabel": "维基百科 · 英文名"
+    },
+    {
+      "id": 9,
+      "title": "饮食男女",
+      "en": "飲食男女",
+      "year": 1994,
+      "type": "电影",
+      "genre": "待补充",
+      "art": "sea",
+      "status": "watched",
+      "by": "—",
+      "date": "10 月 7 日、10 月 8 日",
+      "watchedDates": [
+        "2026-10-07",
+        "2026-10-08"
+      ],
+      "scores": null,
+      "director": "李安"
+    },
+    {
+      "id": 10,
+      "title": "被解决的姜戈",
+      "en": "Django Unchained",
+      "year": 2012,
+      "type": "电影",
+      "genre": "待补充",
+      "art": "space",
+      "status": "watched",
+      "by": "—",
+      "date": "10 月 9 日",
+      "watchedDates": [
+        "2026-10-09"
+      ],
+      "scores": null,
+      "director": "昆汀·塔伦蒂诺",
+      "nameSourceUrl": "https://en.wikipedia.org/wiki/Django_Unchained",
+      "nameSourceLabel": "维基百科 · 原名"
+    }
+  ],
+  "doubanSources": {
+    "1": {
+      "id": "1291856",
+      "rating": 8.1,
+      "sourceUrl": "https://movie.douban.com/subject/1291856/?dt_dapp=1",
+      "ratingNote": "公开页面索引快照，非实时",
+      "year": 2003
+    },
+    "2": {
+      "id": "1828115",
+      "rating": 8.7,
+      "sourceUrl": "https://movie.douban.com/top250?start=-125",
+      "ratingNote": "豆瓣榜单索引快照，非实时",
+      "year": 2007
+    },
+    "3": {
+      "id": "1300930",
+      "rating": null,
+      "year": 1997,
+      "ratingNote": "豆瓣搜索候选已核对，评分待获取"
+    },
+    "4": {
+      "id": "2037432",
+      "rating": 9.4,
+      "sourceUrl": "https://movie.douban.com/celebrity/1275318/movies",
+      "ratingNote": "公开导演作品页快照，非实时",
+      "year": 2005
+    },
+    "5": {
+      "id": "1308865",
+      "rating": null,
+      "ratingNote": "已确认 2003 年韩国版，评分待获取",
+      "year": 2003
+    },
+    "6": {
+      "id": "1291936",
+      "rating": 9,
+      "sourceUrl": "https://movie.douban.com/top250?start=231",
+      "ratingNote": "豆瓣榜单索引快照，非实时",
+      "year": 1995
+    },
+    "8": {
+      "id": "35073886",
+      "rating": 7.6,
+      "sourceUrl": "https://movie.douban.com/subject/35073886/",
+      "ratingNote": "公开页面索引快照，非实时",
+      "year": 2022
+    },
+    "9": {
+      "id": "1291818",
+      "rating": 9.2,
+      "sourceUrl": "https://www.douban.com/doulist/123435310/",
+      "ratingNote": "公开片单索引快照，非实时"
+    },
+    "10": {
+      "id": "6307447",
+      "rating": null,
+      "ratingNote": "条目已核对，评分待获取"
+    }
+  }
+}
