@@ -1,0 +1,13 @@
+<!doctype html>
+<html lang="zh-CN">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#ffffff"><title>jammy和puppy的电影院</title><link rel="stylesheet" href="style.css"></head>
+<body>
+<header class="header"><a class="brand" href="#home"><span class="brand-icon">◒</span> jammy和puppy的电影院<span class="brand-en">a shared viewing archive.</span></a><nav aria-label="主导航"><button data-page="home" class="active">首页</button><button data-page="want">想看清单</button><button data-page="watched">观影档案</button><button data-page="stats">年度回顾 <span class="tiny-dot"></span></button></nav><div class="people"><span class="avatar me">P</span><span class="avatar jammy">J</span><span class="people-label">puppy / Jammy</span></div></header>
+<main id="main"></main>
+<footer><a class="brand" href="#home">◒ jammy和puppy的电影院</a><span>片单 · 评分 · 观后感</span><span class="prototype">风格预览 · 示例数据</span></footer>
+<dialog id="detail"><button class="close" aria-label="关闭详情">×</button><div id="detail-content"></div></dialog>
+<dialog id="add" aria-labelledby="add-title"><button class="close" aria-label="关闭添加">×</button><div class="dialog-body"><span class="eyebrow">ADD TO WATCHLIST</span><h2 id="add-title">添加作品</h2><p class="muted add-intro">输入片名，选择正确年份与版本，自动关联豆瓣并带入资料。</p><div id="add-workflow"></div></div></dialog>
+<dialog id="delete-confirm" aria-labelledby="delete-title"><button class="close" aria-label="关闭删除确认">×</button><div class="dialog-body"><h2 id="delete-title">删除这部作品？</h2><p id="delete-description"></p><p class="muted">作品将移到回收站，已有资料保留，随时可以恢复。</p><p id="delete-error" role="alert" class="form-error"></p><div class="delete-actions"><button data-cancel-delete>取消</button><button data-confirm-delete class="danger-button">移到回收站</button></div></div></dialog>
+<dialog id="trash" aria-labelledby="trash-title"><button class="close" aria-label="关闭回收站">×</button><div class="dialog-body"><h2 id="trash-title">回收站</h2><p class="muted">删除的作品会保留在当前浏览器，可以随时恢复。</p><p id="trash-error" role="alert" class="form-error"></p><div id="trash-list"></div></div></dialog>
+<div id="toast" role="status"></div><script src="app.js"></script><script src="film-metadata.js"></script><script src="add-film.js"></script><script src="add-search.js"></script><script src="delete-film.js"></script><script src="edit-film.js"></script><script src="sync-film-metadata.js"></script><script src="name-sources.js"></script>
+<script src="metadata-search.js"></script></body></html>

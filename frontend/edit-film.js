@@ -1,0 +1,32 @@
+const editStorageKey='gongying.filmEdits.v1';
+let activeCellEditor=null;
+const editableFields={title:'片名',media:'内容',genre:'类型',status:'状态',language:'语言',myScore:'puppy的评分',jammyScore:'Jammy 评分',year:'上映年份',watched:'观看日期',comment:'短评 / 感受',priority:'优先级',author:'添加人',planned:'计划观看'};
+const editOptions={media:['电影','剧集','动漫','纪录片'],status:[['want','想看'],['watched','看过']],priority:[['','普通'],['高优先级','高'],['低优先级','低']],author:['你','Jammy']};
+function validFilmDate(s){if(!/^\d{4}-\d{2}-\d{2}$/.test(s))return false;const d=new Date(s+'T00:00:00Z');return !Number.isNaN(d.getTime())&&d.toISOString().slice(0,10)===s;}
+function filmEditPatch(work,key,input){
+ const value=String(input).trim();if(!editableFields[key])throw Error('不支持修改此字段。');
+ if(key==='myScore'||key==='jammyScore'){if(work.locked&&key==='jammyScore')throw Error('尚未揭晓的评分不可修改。');const score=value===''?null:Number(value);if(score!==null&&(!Number.isFinite(score)||score<0||score>10||Math.abs(score*10-Math.round(score*10))>1e-8))throw Error('评分须为 0–10 分，最多一位小数；留空可清除。');const scores=[work.scores?.[0]??null,work.scores?.[1]??null];scores[key==='myScore'?0:1]=score;return {scores};}
+ if(key==='year'){if(value&&!/^\d{4}$/.test(value))throw Error('请输入四位上映年份。');const n=value?Number(value):null;if(n!==null&&(n<1888||n>2100))throw Error('上映年份须在 1888–2100 之间。');return {year:n,yearCleared:n===null};}
+ if(key==='watched'){const dates=value?[...new Set(value.split(/[，,、\s]+/).map(d=>d.replaceAll('/','-')))]:[];if(dates.length>20||dates.some(d=>!validFilmDate(d)))throw Error('日期格式：2026-10-10，多日用逗号分隔。');dates.sort();return {watchedDates:dates,...(work.status==='watched'?{date:dates.map(d=>d.replaceAll('-','/')).join('、')}:{} )};}
+ if(key==='planned'){if(value&&!validFilmDate(value))throw Error('请填写有效的计划日期。');return {plannedDate:value,...(work.status==='want'?{date:value||'待定'}:{})};}
+ if(editOptions[key]){if(!editOptions[key].some(option=>(Array.isArray(option)?option[0]:option)===value))throw Error('请选择有效选项。');if(key==='status')return {status:value,date:value==='watched'?(work.watchedDates||[]).map(d=>d.replaceAll('-','/')).join('、'):work.plannedDate||'待定'};return {[{media:'type',author:'by',priority:'priority'}[key]]:value};}
+ if(key==='title'&&!value)throw Error('片名不能为空。');if(value.length>(key==='comment'?2000:160))throw Error('内容太长，请缩短后保存。');if(work.locked&&key==='comment')throw Error('尚未揭晓的内容不可修改。');return {[{comment:'note'}[key]||key]:value|| (key==='genre'?'待补充':'')};
+}
+function readFilmEdits(){const data=JSON.parse(localStorage.getItem(editStorageKey)||'{}');if(!data||Array.isArray(data)||typeof data!=='object')throw Error('Invalid edits');return data;}
+function persistFilmEdit(work,key,value){const patch=filmEditPatch(work,key,value),edits=readFilmEdits();edits[work.id]={...(edits[work.id]||{}),...patch};localStorage.setItem(editStorageKey,JSON.stringify(edits));Object.assign(work,patch);return patch;}
+function loadFilmEdits(){try{const edits=readFilmEdits();for(const work of [...works,...deletedWorks.map(r=>r.work)]){const saved=edits[work.id];if(!saved||typeof saved!=='object')continue;for(const key of Object.keys(editableFields)){const prop={media:'type',author:'by',comment:'note',planned:'plannedDate',watched:'watchedDates'}[key]||key;if(key==='myScore'||key==='jammyScore'){if(Array.isArray(saved.scores))try{Object.assign(work,filmEditPatch(work,key,saved.scores[key==='myScore'?0:1]??''));}catch{};}else if(Object.hasOwn(saved,prop))try{Object.assign(work,filmEditPatch(work,key,key==='watched'&&Array.isArray(saved[prop])?saved[prop].join(','):saved[prop]??''));}catch{}}}}catch{showToast('无法读取已保存的修改，存储数据未被覆盖。');}}
+function currentEditValue(work,key){if(key==='myScore'||key==='jammyScore')return work.scores?.[key==='myScore'?0:1]??'';if(key==='year')return work.yearCleared?'':work.year??doubanSources[work.id]?.year??'';if(key==='watched')return (work.watchedDates||[]).join(', ');return work[{media:'type',comment:'note',author:'by',planned:'plannedDate'}[key]||key]||'';}
+function cancelCellEdit(){if(activeCellEditor){const {cell,original}=activeCellEditor;cell.innerHTML=original;activeCellEditor=null;}}
+function beginCellEdit(button){
+ cancelCellEdit();const work=works.find(w=>w.id===Number(button.dataset.editId)),key=button.dataset.edit;if(!work||!editableFields[key])return;
+ const cell=button.closest('td'),value=currentEditValue(work,key);if(!cell)return;activeCellEditor={cell,work,key,original:cell.innerHTML};
+ let control;if(editOptions[key])control=`<select aria-label="${editableFields[key]}">${editOptions[key].map(option=>{const [v,label]=Array.isArray(option)?option:[option,option];return `<option value="${esc(v)}" ${v===value?'selected':''}>${label}</option>`;}).join('')}</select>`;
+ else if(key==='comment')control=`<textarea aria-label="${editableFields[key]}" maxlength="2000">${esc(value)}</textarea>`;
+ else control=`<input aria-label="${editableFields[key]}" type="${['myScore','jammyScore','year'].includes(key)?'number':key==='planned'?'date':'text'}" value="${esc(value)}" ${['myScore','jammyScore'].includes(key)?'min="0" max="10" step="0.1"':key==='year'?'min="1888" max="2100" step="1"':''} ${key==='watched'?'placeholder="2026-10-10, 2026-10-11"':''}>`;
+ cell.innerHTML=`<form class="cell-editor">${control}<div><button type="submit">保存</button><button type="button" data-cancel-cell>取消</button></div><span class="cell-error" role="alert"></span></form>`;cell.querySelector('input,select,textarea').focus();
+}
+function saveCellEdit(event){event.preventDefault();if(!activeCellEditor)return;const {cell,work,key}=activeCellEditor,control=cell.querySelector('input,select,textarea');if(!control.reportValidity())return;try{persistFilmEdit(work,key,control.value);activeCellEditor=null;render();showToast('已保存修改。');}catch(error){cell.querySelector('.cell-error').textContent=/评分|年份|日期|片名|内容|选项|揭晓|字段/.test(error.message)?error.message:'浏览器存储失败，修改未保存。';}}
+document.addEventListener('click',e=>{const b=e.target.closest('button');if(b?.dataset.edit)beginCellEdit(b);if(b?.hasAttribute('data-cancel-cell'))cancelCellEdit();});
+document.addEventListener('submit',e=>{if(e.target.classList.contains('cell-editor'))saveCellEdit(e);});
+document.addEventListener('keydown',e=>{if(!e.target.closest('.cell-editor'))return;if(e.key==='Escape'){e.preventDefault();cancelCellEdit();}else if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();saveCellEdit(e);}});
+loadFilmEdits();render();
