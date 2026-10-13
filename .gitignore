@@ -7,3 +7,8 @@ node_modules/
 Thumbs.db
 frontend/*-preview.jpg
 frontend/*-preview.png
+.runtime/
+*.sqlite
+*.sqlite-shm
+*.sqlite-wal
+backups/

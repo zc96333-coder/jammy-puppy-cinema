@@ -1,9 +1,9 @@
 const {execFile}=require('node:child_process');
 const cache=new Map();
-async function publicJson(url){
+async function publicJson(url,timeout=12000){
  // Windows curl uses the system's network configuration; never invoke a shell.
- if(process.platform==='win32')return new Promise((resolve,reject)=>execFile('curl.exe',['--silent','--show-error','--fail','--max-time','12',url],{windowsHide:true,timeout:14000,maxBuffer:2000000},(error,out)=>{if(error)return reject(error);try{resolve(JSON.parse(out));}catch(e){reject(e);}}));
- const r=await fetch(url,{signal:AbortSignal.timeout(12000),redirect:'error',headers:{'User-Agent':'SharedFilmArchive/1.0'}});if(!r.ok)throw Error('source unavailable');const s=await r.text();if(s.length>2000000)throw Error('response too large');return JSON.parse(s);
+ if(process.platform==='win32')return new Promise((resolve,reject)=>execFile('curl.exe',['--silent','--show-error','--fail','--max-time',String(Math.ceil(timeout/1000)),url],{windowsHide:true,timeout:timeout+2000,maxBuffer:2000000},(error,out)=>{if(error)return reject(error);try{resolve(JSON.parse(out));}catch(e){reject(e);}}));
+ const r=await fetch(url,{signal:AbortSignal.timeout(timeout),redirect:'error',headers:{'User-Agent':'SharedFilmArchive/1.0'}});if(!r.ok)throw Error('source unavailable');const s=await r.text();if(s.length>2000000)throw Error('response too large');return JSON.parse(s);
 }
 function api(params){return 'https://www.wikidata.org/w/api.php?'+new URLSearchParams({...params,format:'json'});}
 function values(e,p){return (e.claims?.[p]||[]).filter(c=>c.rank!=='deprecated').map(c=>c.mainsnak?.datavalue?.value).filter(v=>v!=null);}
@@ -33,4 +33,4 @@ async function searchMetadata(query,reader=publicJson){
   if(reader===publicJson){if(cache.size>=50)cache.delete(cache.keys().next().value);cache.set(q,{until:Date.now()+180000,result});}return result;
  }catch{return {status:502,body:{error:'资料源暂时无法连接，请稍后重试或继续手动填写。这不代表该影片不存在。'}};}
 }
-module.exports={searchMetadata};
+module.exports={searchMetadata,publicJson};

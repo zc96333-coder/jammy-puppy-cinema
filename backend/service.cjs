@@ -1,0 +1,70 @@
+const {randomUUID}=require('node:crypto');
+const people=['puppy','jammy'],kinds=['movie','book','game','other'];
+function fail(message,status=400){throw Object.assign(Error(message),{status});}
+function text(value,max=200,required=false){if(typeof value!=='string')value='';value=value.trim();if(value.length>max)fail('输入太长。');if(required&&!value)fail('请填写名称。');return value;}
+function date(value){if(!/^\d{4}-\d{2}-\d{2}$/.test(value||'')||!Number.isFinite(Date.parse(value))||new Date(value+'T12:00:00Z').toISOString().slice(0,10)!==value)fail('请选择有效日期。');return value;}
+function participants(value){if(!Number.isInteger(value)||value<1||value>3)fail('至少选择一位参与人。');return value;}
+function member(value){if(!people.includes(value))fail('账号只能是 puppy 或 jammy。');return value;}
+function revision(value){if(!Number.isInteger(value)||value<1)fail('缺少记录版本，请刷新重试。',409);return value;}
+function poster(value){
+ if(value===null)return null;if(!value||typeof value!=='object'||Array.isArray(value))fail('海报格式无效。');
+ let image,source;try{image=new URL(value.url);source=new URL(value.sourceUrl);}catch{fail('海报地址无效。');}
+ if(image.protocol!=='https:'||!(image.hostname==='upload.wikimedia.org'||image.hostname==='media.themoviedb.org'||image.hostname==='image.tmdb.org'||/^img\d{0,2}\.doubanio\.com$/.test(image.hostname))||!/\.(jpg|jpeg|png|webp)$/i.test(image.pathname)||image.username||image.password||image.port||image.href.length>2000)fail('海报图片来源无效。');
+ if(source.protocol!=='https:'||!['www.themoviedb.org','zh.wikipedia.org','en.wikipedia.org','commons.wikimedia.org','movie.douban.com'].includes(source.hostname)||source.username||source.password||source.port||source.href.length>2000)fail('海报资料来源无效。');
+ return {url:image.href,sourceUrl:source.href,label:text(value.label,200),source:text(value.source,100)};
+}
+function createService(repo){
+ function work(id){const w=repo.get('works',id);if(!w)fail('作品不存在。',404);return w;}
+ function seed(snapshot){if(repo.meta('seeded'))return;repo.transaction(()=>{for(const f of snapshot.films){const id='film-'+f.id;repo.put('works',id,{id,legacyId:f.id,kind:'movie',title:f.title,en:f.en||'',year:f.year||null,type:f.type||'电影',genre:f.genre||'',director:f.director||'',language:f.language||'',country:f.country||'',synopsis:f.synopsis||'',nameSourceUrl:f.nameSourceUrl||'',status:f.status==='watched'?'done':'want',participants:3,finished:false,reveal:false,deleted:false,by:f.by,douban:snapshot.doubanSources[f.id]||null});for(const [i,d]of (f.watchedDates||[]).entries())repo.put('events','seed-'+f.id+'-'+i,{workId:id,kind:'movie',title:f.title,date:d,state:'done',participants:3,note:'',deleted:false});for(let i=0;i<2;i++)if(f.scores?.[i]!=null)repo.put('reviews',id+':'+people[i],{workId:id,person:people[i],score:f.scores[i],note:'',submitted:false});}repo.meta('seeded','1');});}
+ function snapshot(person){member(person);const reviews=repo.list('reviews');return {
+  works:repo.list('works').map(w=>{const pair=Object.fromEntries(people.map(p=>[p,reviews.find(r=>r.workId===w.id&&r.person===p)||{person:p,score:null,note:'',submitted:false}]));const revealed=!w.reveal||people.every(p=>pair[p].submitted);for(const p of people)if(p!==person&&!revealed)pair[p]={person:p,submitted:pair[p].submitted,hidden:true};return {...w,reviews:pair};}),
+  events:repo.list('events'),chances:repo.list('chances'),demands:repo.list('demands')
+ };}
+ function createWork(input,person){const kind=input.kind;if(!['movie','book','game'].includes(kind))fail('请选择电影、图书或游戏。');const title=text(input.title,160,true),year=input.year==null||input.year===''?null:Number(input.year);if(year!==null&&(!Number.isInteger(year)||year<1000||year>2100))fail('年份无效。');const douban=input.douban?.id&&/^\d{5,12}$/.test(input.douban.id)?{id:input.douban.id,rating:typeof input.douban.rating==='number'&&input.douban.rating>0&&input.douban.rating<=10?input.douban.rating:null,ratingNote:text(input.douban.ratingNote||'来源资料快照，非实时',200),checkedAt:text(input.douban.checkedAt||'',40)}:null;
+  const existing=repo.list('works').find(w=>w.kind===kind&&!w.deleted&&(douban?w.douban?.id===douban.id:w.title===title&&w.year===year));if(existing)return existing;
+  const id=randomUUID();return repo.put('works',id,{kind,title,year,en:text(input.en),director:text(input.director,300),genre:text(input.genre,300),language:text(input.language),country:text(input.country),synopsis:text(input.synopsis,5000),type:text(input.type||({movie:'电影',book:'图书',game:'游戏'}[kind])),nameSourceUrl:/^https:\/\/(www\.wikidata\.org|en\.wikipedia\.org|www\.focusfeatures\.com|m\.1905\.com)\//.test(input.nameSourceUrl||'')?input.nameSourceUrl:'',status:'want',finished:false,participants:participants(input.participants??3),reveal:false,deleted:false,by:person,douban});}
+ function createEvent(input,person){return repo.transaction(()=>{let w=null;if(input.workId)w=work(input.workId);else if(input.workTitle)w=createWork({...input,kind:input.kind,title:input.workTitle},person);const kind=w?.kind||input.kind;if(!kinds.includes(kind))fail('日程类别无效。');if(w?.deleted)fail('作品在回收站，请先恢复。');const state=input.state;if(!['plan','done'].includes(state))fail('请选择计划或做了。');const d=date(input.date),p=participants(input.participants??3),id=randomUUID();const e=repo.put('events',id,{kind,workId:w?.id||null,title:w?.title||text(input.title,160,true),date:d,state,participants:p,note:text(input.note,2000),deleted:false});if(w&&state==='done')repo.put('works',w.id,{...w,participants:w.participants|p,status:w.status==='done'?'done':w.kind==='movie'?'done':'active'},w.version);return e;});}
+ function updateEvent(id,input){return repo.transaction(()=>{const e=repo.get('events',id);if(!e)fail('日程不存在。',404);if(e.demandId||e.chanceId)fail('惩罚日程由机会和要求管理，不能取消或绕过完成权限。',403);revision(input.version);const next={...e};if(input.date!==undefined)next.date=date(input.date);if(input.state!==undefined){if(!['plan','done'].includes(input.state))fail('状态无效。');next.state=input.state;}if(input.participants!==undefined)next.participants=participants(input.participants);if(input.note!==undefined)next.note=text(input.note,2000);if(input.deleted!==undefined)next.deleted=!!input.deleted;const result=repo.put('events',id,next,input.version);if(next.workId&&next.state==='done'&&!next.deleted){const w=work(next.workId);if(w.status!=='done')repo.put('works',w.id,{...w,status:w.kind==='movie'?'done':'active'},w.version);}return result;});}
+ function updateWork(id,input,person){const w=work(id);revision(input.version);const next={...w};for(const key of ['title','en','director','genre','language','country','type','synopsis'])if(input[key]!==undefined)next[key]=text(input[key],key==='synopsis'?5000:key==='director'?300:200,key==='title');if(input.year!==undefined){const y=input.year===''||input.year===null?null:Number(input.year);if(y!==null&&(!Number.isInteger(y)||y<1000||y>2100))fail('年份无效。');next.year=y;}if(input.status!==undefined){if(!['want','active','done'].includes(input.status))fail('状态无效。');next.status=input.status;}for(const key of ['finished','reveal','deleted'])if(input[key]!==undefined)next[key]=!!input[key];if(input.participants!==undefined)next.participants=participants(input.participants);if(input.poster!==undefined){if(w.kind!=='movie')fail('海报仅用于电影。');member(person);next.posters={...(w.posters||{}),[person]:poster(input.poster)};}return repo.put('works',id,next,input.version);}
+ function review(id,input,person){work(id);member(person);let score=input.score;if(score===''||score===null)score=null;else{score=Number(score);if(!Number.isFinite(score)||score<0||score>10||Math.abs(score*10-Math.round(score*10))>1e-8)fail('评分为 0–10 分，精确到 0.1。');}const note=text(input.note,2000),submitted=!!input.submitted;if(submitted&&(score===null||!note))fail('同时揭晓需填评分和感受后提交。');const key=id+':'+person,current=repo.get('reviews',key);if(current)revision(input.version);return repo.put('reviews',key,{workId:id,person,score,note,submitted},current?input.version:undefined);}
+ function grant(input,person){return repo.transaction(()=>{member(person);const owner=member(input.owner),target=owner==='puppy'?'jammy':'puppy',count=Number(input.count??1);if(!Number.isInteger(count)||count<1||count>20)fail('每次记录 1–20 次机会。');const c=repo.put('chances',randomUUID(),{owner,target,count,date:date(input.date),reason:text(input.reason,500),by:person,spent:0});repo.put('events','chance-'+c.id,{kind:'punishment',chanceId:c.id,title:owner+' 获得 '+count+' 次对 '+target+' 的机会',date:c.date,state:'done',participants:3,note:c.reason,deleted:false});return c;});}
+ function demand(input,person){return repo.transaction(()=>{member(person);const key=text(input.requestId,100,true);const duplicate=repo.list('demands').find(d=>d.requestId===key&&d.owner===person);if(duplicate)return duplicate;const grant=repo.list('chances').find(c=>c.owner===person&&c.spent<c.count);if(!grant)fail('没有可使用的机会。');const title=text(input.title,500,true),d=date(input.date);repo.put('chances',grant.id,{...grant,spent:grant.spent+1},grant.version);const item=repo.put('demands',randomUUID(),{requestId:key,owner:person,target:grant.target,title,date:d,state:'requested',chanceId:grant.id});repo.put('events','demand-'+item.id,{kind:'punishment',title:person+' → '+grant.target+'：'+title,date:d,state:'plan',participants:3,demandId:item.id,note:'',deleted:false});return item;});}
+ function completeDemand(id,input,person){return repo.transaction(()=>{const d=repo.get('demands',id);if(!d)fail('要求不存在。',404);if(person!==d.target)fail('请由接受要求的人标记完成。',403);if(d.state==='done')return d;revision(input.version);const result=repo.put('demands',id,{...d,state:'done',completedAt:new Date().toISOString()},input.version);const e=repo.get('events','demand-'+id);repo.put('events',e.id,{...e,state:'done'},e.version);return result;});}
+ function importLegacy(storage,person){
+  member(person);if(repo.meta('legacy-imported'))fail('旧浏览器数据已迁移，请勿重复导入。',409);
+  let added,edits,deleted;try{added=JSON.parse(storage['gongying.addedFilms.v1']||'[]');edits=JSON.parse(storage['gongying.filmEdits.v1']||'{}');deleted=JSON.parse(storage['gongying.deletedFilms.v1']||'[]');}catch{fail('旧备份格式无效。');}
+  if(!Array.isArray(added)||added.length>500||!edits||typeof edits!=='object'||Array.isArray(edits)||!Array.isArray(deleted))fail('旧备份格式无效。');
+  return repo.transaction(()=>{
+   const legacyMap=new Map(repo.list('works').filter(w=>w.legacyId).map(w=>[w.legacyId,w.id]));
+   for(const r of added){
+    const f=r.work;if(!f||!Number.isSafeInteger(f.id)||f.id<=10)fail('旧作品记录无效。');
+    const oldId=legacyMap.get(f.id),w=oldId?work(oldId):createWork({...f,kind:'movie',participants:3,douban:r.douban},person);
+    repo.put('works',w.id,{...w,legacyId:f.id,status:f.status==='watched'?'done':'want',deleted:false},w.version);legacyMap.set(f.id,w.id);
+    for(const d of (f.watchedDates||[]))createEvent({workId:w.id,date:d,state:'done',participants:3},person);
+    for(const [i,p]of people.entries())if(f.scores?.[i]!=null)review(w.id,{score:f.scores[i],note:i===0?f.note||'':'',submitted:false},p);
+   }
+   for(const current of repo.list('works')){
+    const edit=edits[current.legacyId],patch={version:current.version};
+    if(edit){
+     for(const key of ['title','en','year','genre','language','director','country','synopsis','type'])if(edit[key]!==undefined)patch[key]=edit[key];
+     if(edit.status)patch.status=edit.status==='watched'?'done':'want';
+     if(edit.watchedDates!==undefined){
+      if(!Array.isArray(edit.watchedDates))fail('旧日期格式无效。');
+      const wanted=new Set(edit.watchedDates.map(date)),existing=repo.list('events').filter(e=>e.workId===current.id&&!e.deleted);
+      for(const e of existing)if(!wanted.has(e.date))repo.put('events',e.id,{...e,deleted:true},e.version);
+      for(const d of wanted)if(!existing.some(e=>e.date===d))createEvent({workId:current.id,date:d,state:'done',participants:3},person);
+     }
+     if(edit.plannedDate&&edit.status==='want'&&!repo.list('events').some(e=>e.workId===current.id&&e.state==='plan'&&e.date===edit.plannedDate))createEvent({workId:current.id,date:edit.plannedDate,state:'plan',participants:3},person);
+     for(const [i,p]of people.entries())if(Array.isArray(edit.scores)){
+      const old=repo.get('reviews',current.id+':'+p);review(current.id,{score:edit.scores[i]??null,note:old?.note||(i===0?edit.note||'':''),submitted:false,...(old?{version:old.version}:{})},p);
+     }else if(edit.note){const old=repo.get('reviews',current.id+':puppy');review(current.id,{score:old?.score??null,note:edit.note,submitted:false,...(old?{version:old.version}:{})},'puppy');}
+    }
+    const latest=work(current.id);patch.version=latest.version;if(deleted.includes(current.legacyId))patch.deleted=true;updateWork(current.id,patch);
+   }
+   repo.meta('legacy-imported',new Date().toISOString());return {imported:true};
+  });
+ }
+ function batchWorks(input){if(!Array.isArray(input.items)||input.items.length<1||input.items.length>500)fail('请选择 1–500 个作品。');return repo.transaction(()=>input.items.map(item=>updateWork(item.id,{version:item.version,deleted:!!input.deleted})));}
+ return {seed,snapshot,createWork,createEvent,updateEvent,updateWork,batchWorks,review,grant,demand,completeDemand,importLegacy};
+}
+module.exports={createService,date,participants};
