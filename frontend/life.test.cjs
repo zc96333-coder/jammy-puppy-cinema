@@ -58,3 +58,27 @@ test('lowest density renders years and month groups without thousands of day ele
  const detail=h.nodes.get('#event-detail-row').innerHTML;
  for(const name of ['攻壳机动队','登堂入室','分手的决心','饮食男女'])assert.ok(detail.includes(name));
 });
+test('first entrance spreads the rail then months then plans without moving real dates',t=>{
+ const h=harness(t),calls=[],animations=[];
+ const rect={left:20,right:620,width:600};
+ const animated=label=>({getBoundingClientRect(){return rect;},animate(frames,options){calls.push({label,frames,options});const a={finished:new Promise(()=>{}),finish(){this.finishedByUser=true;},cancel(){this.cancelled=true;}};animations.push(a);return a;}});
+ h.nodes.set('.visual-scroll',{...animated('scroll'),scrollLeft:555});
+ h.nodes.set('.single-axis',animated('rail'));h.nodes.set('.event-detail-space',animated('panel'));
+ h.context.requestAnimationFrame=()=>{};h.context.document.querySelectorAll=selector=>selector==='.axis-month'?[animated('month')]:selector==='.schedule-plan'?[animated('plan')]:[];
+ const events=JSON.stringify(h.service.snapshot('puppy').events);
+ h.run('animateScheduleEntrance()');assert.deepEqual(calls.map(c=>c.label),['rail','month','panel','plan']);
+ assert.ok(calls[0].options.delay<calls[1].options.delay&&calls[1].options.delay<calls[2].options.delay);
+ const upperEnd=Math.max(...calls.filter(c=>['rail','month'].includes(c.label)).map(c=>c.options.delay+c.options.duration));
+ assert.ok(calls.find(c=>c.label==='panel').options.delay>upperEnd);
+ assert.ok(calls.find(c=>c.label==='plan').options.delay>upperEnd);
+ assert.ok(calls.find(c=>c.label==='plan').options.delay+calls.find(c=>c.label==='plan').options.duration>=3700);
+ assert.match(calls[0].frames[0].clipPath,/inset/);assert.equal(h.nodes.get('.visual-scroll').scrollLeft,555);
+ h.run('animateScheduleEntrance()');assert.equal(calls.length,4);
+ h.run('finishScheduleEntrance()');assert.ok(animations.every(a=>a.finishedByUser&&a.cancelled));
+ assert.equal(h.run('entranceAnimations.length'),0);assert.equal(JSON.stringify(h.service.snapshot('puppy').events),events);
+});
+test('reduced motion skips entrance animation and never replays on data refresh',t=>{
+ const h=harness(t);h.context.requestAnimationFrame=()=>{};h.context.window.matchMedia=()=>({matches:true});
+ h.nodes.set('.visual-scroll',{animate(){throw Error('must not animate');}});
+ h.run('animateScheduleEntrance();animateScheduleEntrance()');assert.equal(h.run('scheduleEntranceShown'),true);assert.equal(h.run('entranceAnimations.length'),0);
+});

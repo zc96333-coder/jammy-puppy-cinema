@@ -20,6 +20,41 @@ function render(){if(!person)return renderLogin();document.body?.classList.toggl
 const T=TimelineEngine;
 let visualScale=36,visualFocus=null,visualScrollLeft=null,axisShift=0,recyclingAxis=false;
 let axisGroups=new Map(),pinnedEventIds=[];
+let scheduleEntranceShown=false,entranceAnimations=[];
+function finishScheduleEntrance(){
+ const running=entranceAnimations;entranceAnimations=[];
+ for(const animation of running){try{animation.finish();animation.cancel();}catch{animation.cancel();}}
+}
+function animateScheduleEntrance(){
+ if(scheduleEntranceShown)return;scheduleEntranceShown=true;
+ const scroll=$('.visual-scroll');if(!scroll?.animate||reducedMotion())return;
+ const viewport=scroll.getBoundingClientRect(),center=viewport.left+viewport.width/2,easing='cubic-bezier(.22,1,.36,1)';
+ function play(node,frames,options){
+  const animation=node.animate(frames,{easing,fill:'backwards',...options});entranceAnimations.push(animation);
+  animation.finished.then(()=>{animation.cancel();entranceAnimations=entranceAnimations.filter(a=>a!==animation);}).catch(()=>{});
+ }
+ function sweep(node,delay,duration){
+  const box=node.getBoundingClientRect();if(!box.width||box.right<viewport.left||box.left>viewport.right)return;
+  const origin=Math.max(0,Math.min(box.width,center-box.left)),left=Math.max(0,viewport.left-box.left),right=Math.max(0,box.right-viewport.right);
+  play(node,[{opacity:.15,clipPath:'inset(0 '+(box.width-origin)+'px 0 '+origin+'px)'},{opacity:1,clipPath:'inset(0 '+right+'px 0 '+left+'px)'}],{delay,duration});
+ }
+ const rail=$('.single-axis');if(rail)sweep(rail,0,1500);
+ document.querySelectorAll('.axis-date,.visual-node,.node-connector,.today-marker').forEach(node=>{
+  const box=node.getBoundingClientRect();if(box.right<viewport.left||box.left>viewport.right)return;
+  const distance=Math.min(1,Math.abs(box.left+box.width/2-center)/(viewport.width/2));
+  // Keep existing hover transforms and the today marker's centering intact.
+  play(node,[{opacity:0,scale:'.86'},{opacity:1,scale:'1'}],{delay:700+distance*500,duration:1000});
+ });
+ document.querySelectorAll('.axis-month').forEach(node=>sweep(node,800,1450));
+ document.querySelectorAll('.axis-year').forEach(node=>play(node,[{opacity:0},{opacity:1}],{delay:1400,duration:700}));
+ // Upper section completes by 2250ms; only then reveal the lower section.
+ const panel=$('.event-detail-space');if(panel)play(panel,[{opacity:0,transform:'translateY(10px)'},{opacity:1,transform:'translateY(0)'}],{delay:2400,duration:1100});
+ document.querySelectorAll('.schedule-plan').forEach((node,i)=>play(node,[{opacity:0,transform:'translateY(8px)'},{opacity:1,transform:'translateY(0)'}],{delay:2600+Math.min(i,4)*100,duration:1100}));
+}
+// Any intentional interaction reveals the complete page immediately.
+document.addEventListener('pointerdown',finishScheduleEntrance,{capture:true});
+document.addEventListener('wheel',finishScheduleEntrance,{capture:true,passive:true});
+document.addEventListener('keydown',finishScheduleEntrance,{capture:true});
 function visualIcon(name){
  const paths={
   plus:'<path d="M12 5v14M5 12h14"/>',
@@ -288,6 +323,7 @@ function recycleAxisIfNeeded(){
 }
 
 function renderSchedule(reset=false){
+ finishScheduleEntrance();
  stopAxisMotion();stopZoomMotion();hideEventHover();
  const prior=$('.visual-scroll');if(!reset&&prior&&typeof prior.scrollLeft==='number')visualScrollLeft=prior.scrollLeft;
  const events=visibleEvents().sort((a,b)=>a.date.localeCompare(b.date)||a.id.localeCompare(b.id));
@@ -310,6 +346,7 @@ function renderSchedule(reset=false){
   scroller.scrollLeft=Math.max(0,80+(center-window.start)*visualScale-scroller.clientWidth/2);
   scroller.addEventListener('scroll',()=>{if(!recyclingAxis){recycleAxisIfNeeded();updateVisualRange();hideEventHover();visualScrollLeft=scroller.scrollLeft;}},{passive:true});updateVisualRange();
  }
+ animateScheduleEntrance();
 }
 const columns=[['title','片名',270],['poster','海报',108],['type','内容',85],['genre','类型',140],['status','状态',90],['puppy','puppy的评分',110],['jammy','Jammy 评分',110],['douban','豆瓣评分',95],['year','年份',75],['dates','日程记录',170],['language','语言',100],['people','参与人',100]];
 function libraryItems(){return state.works.filter(w=>w.kind===page&&!!w.deleted===showTrash&&(libraryFilter==='all'||w.status===libraryFilter)&&(!librarySearch||(w.title+' '+w.en).toLowerCase().includes(librarySearch.toLowerCase()))&&(libraryYear==='all'||(libraryYear==='new'?w.year>=2010:w.year<2010&&w.year!=null))&&(libraryGenre==='all'||w.genre===libraryGenre)&&(libraryScore==='all'||(w.reviews?.[person]?.score!=null&&w.reviews[person].score>=Number(libraryScore)))).sort((a,b)=>sort==='year'?(b.year||0)-(a.year||0):sort==='title'?a.title.localeCompare(b.title,'zh'):0);}
