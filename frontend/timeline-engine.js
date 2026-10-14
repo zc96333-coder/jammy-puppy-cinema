@@ -13,7 +13,7 @@
  }
  function groups(events,scale,start,days){
   const map=new Map();
-  for(const event of events){const d=index(event.date);if(d<start||d>=start+days)continue;
+  for(const event of events){const d=index(event.date);if(!Number.isFinite(d)||d<start||d>=start+days)continue;
    const key=scale>=24?event.date:scale>=8?date(d-((new Date(d*DAY).getUTCDay()+6)%7)):scale>=.65?event.date.slice(0,7)+'-01':event.date.slice(0,4)+'-01-01';
    if(!map.has(key))map.set(key,[]);map.get(key).push(event);
   }return map;

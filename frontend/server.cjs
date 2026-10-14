@@ -9,7 +9,7 @@ const seed=require('../data/film-records-snapshot.json');
 const repo=createRepository(process.env.DATABASE_FILE||path.resolve(__dirname,'../.runtime/shared-life.sqlite'));
 const app=createApplication({repository:repo,seed,metadata:{lookupSubject,searchSubjects,snapshots,byTitle,searchMetadata,searchPosters}});
 const types={'.html':'text/html; charset=utf-8','.css':'text/css; charset=utf-8','.js':'application/javascript; charset=utf-8'};
-const allowed=new Set(['index.html','life.js','timeline-engine.js','life.css','style.css','backup.html','film-metadata.js']);
+const allowed=new Set(['index.html','life.js','composer.js','timeline-engine.js','life.css','style.css','backup.html','film-metadata.js']);
 const port=Number(process.env.PORT||4173);
 http.createServer(async(req,res)=>{
  try{

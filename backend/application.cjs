@@ -40,7 +40,7 @@ function createApplication({repository,seed,env=process.env,metadata={}}){
    if(u.pathname==='/api/chances'&&method==='POST')return json(service.grant(b,person),201);
    if(u.pathname==='/api/demands'&&method==='POST')return json(service.demand(b,person),201);
    const route=u.pathname.match(/^\/api\/(works|events|reviews|demands)\/([^/]+)$/);
-   if(route&&method==='PATCH'){const id=decodeURIComponent(route[2]);return json(route[1]==='works'?service.updateWork(id,b,person):route[1]==='events'?service.updateEvent(id,b):route[1]==='reviews'?service.review(id,b,person):service.completeDemand(id,b,person));}
+   if(route&&method==='PATCH'){const id=decodeURIComponent(route[2]);return json(route[1]==='works'?service.updateWork(id,b,person):route[1]==='events'?service.updateEvent(id,b,person):route[1]==='reviews'?service.review(id,b,person):service.completeDemand(id,b,person));}
    if(method==='GET'&&u.pathname==='/api/douban/catalog')return json({...metadata.snapshots,_unlinked:metadata.byTitle});
    if(method==='GET'&&u.pathname==='/api/douban/search'){const r=await metadata.searchSubjects(u.searchParams.get('q')||'');return json(r.body,r.status);}
    if(method==='GET'&&u.pathname==='/api/douban'){const r=await metadata.lookupSubject(u.searchParams.get('id')||'');return json(r.body,r.status);}
