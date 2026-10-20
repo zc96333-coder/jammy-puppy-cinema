@@ -1,5 +1,16 @@
 const test=require('node:test'),assert=require('node:assert/strict'),vm=require('node:vm'),fs=require('node:fs');
 const {createRepository}=require('../backend/repository.cjs'),{createService}=require('../backend/service.cjs');
+test('console flows directly from content to date with no participant controls and always saves together',async t=>{
+ const h=harness(t),theme=vm.createContext({window:{}}),steps=[];vm.runInContext(fs.readFileSync(__dirname+'/pixel-console.js','utf8'),theme);
+ h.context.window.CinemaConsole={channelsHTML:theme.window.CinemaConsole.channelsHTML,setChannel(){},connect(){},updateSteps:data=>steps.push(data)};
+ h.run('renderSchedule();LifeComposer.start()');await h.run("LifeComposer.click({dataset:{composer:'kind',value:'game'}})");
+ assert.doesNotMatch(h.nodes.get('#schedule-plans').innerHTML,/data-composer-step="people"|谁一起|data-composer="people"/);
+ await h.run("LifeComposer.click({dataset:{composer:'work',value:'test-game'}})");assert.equal(h.run('LifeComposer.getDraft().step'),'date');assert.equal(steps.at(-1).step,'date');
+ await h.run("LifeComposer.click({dataset:{composer:'date-intent',value:'unsure'}})");assert.equal(h.run('LifeComposer.getDraft().step'),'confirm');assert.equal(steps.at(-1).dateReady,true);
+ assert.doesNotMatch(h.nodes.get('#composer-summary').innerHTML,/data-value="people"|一起|puppy|jammy/);
+ h.run('LifeComposer.getDraft().people=1');assert.equal(h.run('LifeComposer.payload().participants'),3);assert.equal(h.run('LifeComposer.payload().dateIntent'),'unsure');
+ await h.run("LifeComposer.click({dataset:{composer:'back',value:'date'}})");await h.run("LifeComposer.click({dataset:{composer:'date-preset',value:'1'}})");assert.equal(h.run('LifeComposer.payload().date'),h.run('shift(today(),1)'));assert.equal(h.run('LifeComposer.payload().participants'),3);
+});
 test('opt-in console uses fixed channels and bypasses card geometry while preserving composer state',async t=>{
  const h=harness(t),theme=vm.createContext({window:{}}),channels=[];vm.runInContext(fs.readFileSync(__dirname+'/pixel-console.js','utf8'),theme);
  h.context.window.CinemaConsole={channelsHTML:theme.window.CinemaConsole.channelsHTML,setChannel:k=>channels.push(k),connect:k=>channels.push('connect:'+k)};

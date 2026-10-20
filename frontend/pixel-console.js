@@ -2,12 +2,34 @@
 (()=>{
  'use strict';
  const shouldSwitch=(previous,next)=>previous!==null&&previous!==next;
+ const text=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+ const stepIndex=step=>step==='date'?1:['confirm','state'].includes(step)?2:0;
+ function stepsHTML({step,content='',contentStep='work',dateLabel='暂不确定',ready=false,dateReady=false}){
+  const active=stepIndex(step),items=[{label:'内容',value:contentStep,note:content||'选择内容',done:ready},{label:'日期',value:'date',note:dateLabel,done:dateReady},{label:'确认',value:'confirm',note:'保存记录',done:false}];
+  return items.map((item,i)=>'<button type="button" class="console-step-port'+(i===active?' is-active':'')+(item.done?' is-complete':'')+'" data-composer="back" data-value="'+text(item.value)+'" '+(i>0&&(!ready||i===2&&!dateReady)?'disabled ':'')+'aria-current="'+(i===active?'step':'false')+'"><i aria-hidden="true"></i><span>'+item.label+'<small title="'+text(item.note)+'">'+text(item.note)+'</small></span></button>').join('');
+ }
  const channelsHTML=(active,labels,artwork)=>'<nav class="console-channel-bus" aria-label="活动通道">'+['movie','book','game','other','punishment'].map(kind=>'<button type="button" class="console-channel" data-composer="kind" data-value="'+kind+'" aria-pressed="'+(kind===active)+'"><span class="console-port" aria-hidden="true">'+artwork({kind})+'</span><span>'+labels[kind]+'</span><i class="console-port-light" aria-hidden="true"></i></button>').join('')+'</nav><svg class="console-channel-link" aria-hidden="true"><path pathLength="100"/></svg>';
- window.CinemaConsole={shouldSwitch,channelsHTML};
+ window.CinemaConsole={shouldSwitch,channelsHTML,stepsHTML,stepIndex};
  if(typeof document==='undefined')return;
  const root=document.querySelector('#main');if(!root)return;
  const reduced=window.matchMedia('(prefers-reduced-motion: reduce)');
- let linkFrame=0,linkMotion=null,workspaceMotion=null,activeChannel=null;
+ let linkFrame=0,linkMotion=null,workspaceMotion=null,stepLinkMotion=null,stepMotion=null,activeChannel=null;
+ function updateSteps(data){
+  const workspace=root.querySelector('[data-console] .console-workspace');if(!workspace)return;
+  const previous=workspace.dataset.step;workspace.dataset.step=data.step==='category'?'':data.step;
+  let ports=workspace.querySelector('.console-step-bus'),svg=workspace.querySelector('.console-step-link');
+  if(!ports){ports=document.createElement('nav');ports.className='console-step-bus';ports.setAttribute('aria-label','记录步骤接口');workspace.querySelector('form')?.before(ports);}
+  if(!svg){svg=document.createElementNS('http://www.w3.org/2000/svg','svg');svg.setAttribute('class','console-step-link');svg.setAttribute('aria-hidden','true');const path=document.createElementNS('http://www.w3.org/2000/svg','path');path.setAttribute('pathLength','100');svg.append(path);workspace.append(svg);}
+  ports.hidden=svg.hidden=data.step==='category';if(data.step==='category')return;
+  ports.innerHTML=stepsHTML(data);
+  if(!linkFrame)linkFrame=requestAnimationFrame(drawLink);
+  if(data.animate&&previous!==data.step&&!reduced.matches){stop(stepLinkMotion);stop(stepMotion);stepLinkMotion=svg.querySelector('path').animate?.([{strokeDashoffset:100,opacity:.3},{strokeDashoffset:0,opacity:1}],{duration:260,easing:'ease-out'});const section=workspace.querySelector('[data-composer-step="'+data.step+'"]');stepMotion=section?.animate?.([{opacity:.4,transform:'translateY(6px)'},{opacity:1,transform:'translateY(0)'}],{duration:230,easing:'cubic-bezier(.16,1,.3,1)'});}
+ }
+ function drawStepLink(workspace){
+  const port=workspace.querySelector('.console-step-port.is-active'),step=workspace.dataset.step,section=step&&workspace.querySelector('[data-composer-step="'+step+'"]'),svg=workspace.querySelector('.console-step-link');if(!port||!section||!svg||svg.hidden)return;
+  const box=workspace.getBoundingClientRect(),a=port.getBoundingClientRect(),b=section.getBoundingClientRect(),sx=a.left+a.width/2-box.left,sy=a.bottom-box.top,tx=b.left-box.left-8,ty=b.top-box.top+12;
+  svg.setAttribute('viewBox','0 0 '+box.width+' '+box.height);svg.querySelector('path').setAttribute('d','M'+sx+' '+sy+'V'+(sy+ty)/2+'H'+tx+'V'+ty);
+ }
  function setChannel(kind){
   const panel=root.querySelector('[data-console]');if(!panel)return;
   const previous=panel.dataset.channel||'';panel.dataset.channel=kind||'';activeChannel=kind;
@@ -21,12 +43,13 @@
   const sx=(horizontal?port.right:port.left+port.width/2)-box.left,sy=(horizontal?port.top+port.height/2:port.bottom)-box.top,tx=(horizontal?target.left:target.left+target.width/2)-box.left,ty=(horizontal?target.top+36:target.top)-box.top;
   const d=horizontal?'M'+sx+' '+sy+'H'+(sx+tx)/2+'V'+ty+'H'+tx:'M'+sx+' '+sy+'V'+(sy+ty)/2+'H'+tx+'V'+ty;
   svg.setAttribute('viewBox','0 0 '+box.width+' '+box.height);svg.querySelector('path').setAttribute('d',d);
+  drawStepLink(workspace);
  }
  function connect(kind){
   setChannel(kind);const panel=root.querySelector('[data-console]'),workspace=panel?.querySelector('.console-workspace'),path=panel?.querySelector('.console-channel-link path');stop(linkMotion);stop(workspaceMotion);
   if(!reduced.matches){linkMotion=path?.animate?.([{strokeDashoffset:100,opacity:.3},{strokeDashoffset:0,opacity:1}],{duration:280,easing:'ease-out'});workspaceMotion=workspace?.animate?.([{opacity:.4,transform:'translateX(6px)'},{opacity:1,transform:'translateX(0)'}],{duration:230,easing:'cubic-bezier(.16,1,.3,1)'});}
  }
- Object.assign(window.CinemaConsole,{setChannel,connect});
+ Object.assign(window.CinemaConsole,{setChannel,connect,updateSteps});
  let frame=0,plans=null,row=null,lastMode=null,lastDetail=null,lastTab=null;
  let indicatorMotion=null,surfaceMotion=null,detailMotion=null,saveMotion=null;
  const jobs=[];
@@ -62,5 +85,5 @@
  });
  if(toast)saveObserver.observe(toast,{attributes:true,attributeFilter:['class'],childList:true});
  window.addEventListener('resize',()=>{if(activeChannel&&!linkFrame)linkFrame=requestAnimationFrame(drawLink);});
- window.addEventListener('pagehide',()=>{mainObserver.disconnect();saveObserver.disconnect();for(const job of jobs)job.disconnect();for(const motion of [indicatorMotion,surfaceMotion,detailMotion,saveMotion,linkMotion,workspaceMotion])stop(motion);if(frame)cancelAnimationFrame(frame);if(linkFrame)cancelAnimationFrame(linkFrame);});schedule();
+ window.addEventListener('pagehide',()=>{mainObserver.disconnect();saveObserver.disconnect();for(const job of jobs)job.disconnect();for(const motion of [indicatorMotion,surfaceMotion,detailMotion,saveMotion,linkMotion,workspaceMotion,stepLinkMotion,stepMotion])stop(motion);if(frame)cancelAnimationFrame(frame);if(linkFrame)cancelAnimationFrame(linkFrame);});schedule();
 })();
