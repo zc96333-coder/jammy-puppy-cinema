@@ -30,3 +30,38 @@ test('theme preserves original animation rules and scopes styling to the new sch
  assert.match(css,/\.pixel-theme\.visual-schedule-page \.visual-schedule \.axis-date\.is-future \.axis-numeral\{color:#d6b181\}/,'future dates must not inherit original blue');
  assert.match(read('server.cjs'),/'pixel-schedule.html','pixel-schedule.css','pixel-schedule.js'/);
 });
+
+test('civil-day expressions preserve original centers without measuring each node',()=>{
+ const ctx=vm.createContext({window:{}});vm.runInContext(read('pixel-schedule.js'),ctx);const {position}=ctx.window.CinemaPixel;
+ for(const scale of [.25,8,36,80,160])for(const index of [-50,.5,12.5,500]){
+  assert.equal(position('calc(62px + '+index+' * var(--time-scale))',36,scale),80+index*scale);
+  assert.equal(position('calc(80px + '+index+' * var(--time-scale) - min(var(--time-scale), 44px) / 2)',44,scale,true),80+index*scale);
+ }
+ assert.equal(position('12px',36,36),null,'unrecognized formulas must use a current geometry fallback');
+});
+
+test('zoom batches layout reads before writes and skips offscreen/unchanged nodes',()=>{
+ let trace=[],frames=[],observers=[];
+ class Node{
+  constructor(name=''){this.name=name;this.children=[];this.dataset={};this.metrics={width:36,left:0,height:400,top:288};this.values={};this.attrs={};this.listeners={};this.className='';
+   this.style=new Proxy({getPropertyValue:k=>this.values[k]||'',setProperty:(k,v)=>{trace.push(['write',this.name,k]);this.values[k]=v;}},{get:(o,k)=>k in o?o[k]:this.values[k],set:(o,k,v)=>{trace.push(['write',this.name,k]);this.values[k]=v;return true;}});
+   this.classList={add:c=>{this.className+=' '+c;},contains:c=>this.className.split(' ').includes(c)};
+  }
+  get offsetWidth(){trace.push(['read',this.name]);return this.metrics.width;}get offsetLeft(){trace.push(['read',this.name]);return this.metrics.left;}get offsetTop(){trace.push(['read',this.name]);return this.metrics.top;}get offsetHeight(){trace.push(['read',this.name]);return this.metrics.height;}get clientWidth(){trace.push(['read',this.name]);return this.metrics.width;}
+  setAttribute(k,v){trace.push(['write',this.name,k]);this.attrs[k]=v;if(k==='class')this.className=v;}
+  append(n){this.children.push(n);}prepend(n){this.children.unshift(n);}addEventListener(k,f){this.listeners[k]=f;}
+  matches(sel){return sel.split(',').some(c=>this.classList.contains(c.trim().slice(1)));}
+  querySelector(sel){return this.children.find(n=>n.matches(sel.replace(':scope > ','')))||null;}
+ }
+ const root=new Node('root'),scroll=new Node('scroll'),track=new Node('track'),rail=new Node('rail');scroll.className='visual-scroll';track.className='visual-track';rail.className='single-axis';rail.metrics.height=1;scroll.metrics.width=1200;scroll.scrollLeft=0;track.values['--time-scale']='36px';root.append(scroll);scroll.append(track);track.append(rail);
+ for(let i=0;i<400;i++){const n=new Node('event'+i);n.className='visual-node';n.values.left='calc(62px + '+i+' * var(--time-scale))';track.append(n);}
+ const ctx=vm.createContext({window:{addEventListener(){}},document:{querySelector:()=>root,createElement:()=>new Node(),createElementNS:()=>new Node('svg'),body:new Node()},MutationObserver:class{constructor(fn){this.fn=fn;observers.push(this);}observe(n){this.target=n;}disconnect(){}},requestAnimationFrame:f=>{frames.push(f);return 1;},cancelAnimationFrame(){}});
+ vm.runInContext(read('pixel-schedule.js'),ctx);trace=[];frames.shift()();
+ assert.ok(trace.filter(x=>x[0]==='write'&&x[2]==='--orbit-rise').length<45,'offscreen nodes are not written');
+ const zoomObserver=observers.find(o=>o.target===track);
+ track.values['--time-scale']='40px';scroll.scrollLeft=20;trace=[];zoomObserver.fn([]);frames.shift()();
+ const reads=trace.filter(x=>x[0]==='read');assert.ok(reads.length<=5,'steady zoom reads viewport/rail metrics, not 400 node layouts');
+ const firstWrite=trace.findIndex(x=>x[0]==='write');assert.ok(firstWrite>=0);assert.ok(trace.slice(firstWrite).every(x=>x[0]!=='read'),'no forced read/write interleaving');
+ trace=[];zoomObserver.fn([]);frames.shift()();assert.equal(trace.filter(x=>x[2]==='--orbit-rise').length,0,'unchanged nodes are not restyled');
+ observers[0].fn([{type:'childList',target:new Node('review-editor'),addedNodes:[new Node()],removedNodes:[]}]);assert.equal(frames.length,0,'unrelated detail edits do not repaint the timeline');
+});

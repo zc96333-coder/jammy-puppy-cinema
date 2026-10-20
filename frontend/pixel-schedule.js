@@ -21,34 +21,52 @@
  };
  const icon=name=>'<svg class="pixel-icon" viewBox="0 0 24 24" fill="currentColor" stroke="none" shape-rendering="crispEdges" aria-hidden="true"><path fill-rule="evenodd" d="'+(shapes[name]||shapes.other)+'"/></svg>';
  const rise=(x,width)=>-Math.min(28,width*.035)*Math.pow(Math.min(1.15,Math.abs(x-width/2)/(width/2)),2);
- window.CinemaPixel={icon,rise};
+ // Original timeline left positions are civil-day expressions, not DOM measurements.
+ const position=(left,width,scale,date=false)=>{const m=left.match(/^calc\(([-\d.]+)px \+ ([-\d.]+) \* var\(--time-scale\)/);return m?Number(m[1])+Number(m[2])*scale+(date?0:width/2):null;};
+ window.CinemaPixel={icon,rise,position};
  if(typeof document==='undefined')return;
  const root=document.querySelector('#main');if(!root)return;
  const cosmos=document.createElement('div');cosmos.id='pixel-cosmos';cosmos.setAttribute('aria-hidden','true');
  let seed=641,stars='';const rand=()=>{seed=seed*16807%2147483647;return seed/2147483647;};
  for(let i=0;i<90;i++)stars+='<i style="left:'+(rand()*100).toFixed(2)+'%;top:'+(rand()*100).toFixed(2)+'%;opacity:'+(rand()*.35+.12).toFixed(2)+'" class="'+(i%17===0?'pixel-star-cross':'')+'"></i>';
  cosmos.innerHTML=stars+'<div class="pixel-constellation"></div><div class="pixel-moon"></div>';document.body.prepend(cosmos);
- let frame=0,scroller=null,track=null,observer=null;
+ let frame=0,scroller=null,track=null,observer=null,dirty=true,entries=[],svg=null,shapeKey='',futureKey='';
  const ns='http://www.w3.org/2000/svg';
  function schedule(){if(!frame)frame=requestAnimationFrame(paint);}
  function paint(){
   frame=0;const scroll=root.querySelector('.visual-scroll'),nextTrack=scroll?.querySelector('.visual-track');
   if(!scroll||!nextTrack)return;
   if(scroll!==scroller){scroller=scroll;scroll.addEventListener('scroll',schedule,{passive:true});}
-  if(track!==nextTrack){track=nextTrack;observer?.disconnect();observer=new MutationObserver(schedule);observer.observe(track,{attributes:true,attributeFilter:['style','data-detail','data-titles','data-hide-titles']});}
+  if(track!==nextTrack){track=nextTrack;dirty=true;svg=null;shapeKey=futureKey='';observer?.disconnect();observer=new MutationObserver(schedule);observer.observe(track,{attributes:true,attributeFilter:['style','data-detail','data-titles','data-hide-titles']});}
   const width=scroll.clientWidth;if(!width)return;
   const original=track.querySelector(':scope > .single-axis');if(!original)return;
-  let svg=track.querySelector(':scope > .pixel-rail');
+  // READ phase: finish geometry reads before changing any margin, path or size.
+  const base=original.offsetTop+original.offsetHeight/2,left=scroll.scrollLeft,height=track.offsetHeight,scale=parseFloat(track.style.getPropertyValue('--time-scale'))||36;
+  if(dirty){svg=track.querySelector(':scope > .pixel-rail');shapeKey=futureKey='';entries=[];
+   for(const node of track.children){if(!node.matches('.visual-node,.axis-date,.event-anchor,.node-connector,.today-marker'))continue;
+    const date=node.matches('.axis-date'),nodeWidth=node.offsetWidth,formula=node.style.left;
+    entries.push({node,date,width:nodeWidth,formula,last:null,today:node.matches('.today-marker')});
+   }dirty=false;
+  }
+  const updates=[];let todayX=width;
+  for(const item of entries){const x=(position(item.formula,item.width,scale,item.date)??(item.node.offsetLeft+item.node.offsetWidth/2))-left;
+   if(item.today)todayX=x-item.width/2;
+   const y=x>=-100&&x<=width+100?rise(x,width).toFixed(2)+'px':'0px';
+   if(y!==item.last){if(item.last!==null||y!=='0px')updates.push([item.node,y]);item.last=y;}
+  }
+  // WRITE phase: no offset/bounds reads below this point (avoids layout per node).
   if(!svg){svg=document.createElementNS(ns,'svg');svg.classList.add('pixel-rail');svg.setAttribute('aria-hidden','true');for(const type of ['halo','past','future']){const path=document.createElementNS(ns,'path');path.setAttribute('class','pixel-rail-'+type);svg.append(path);}track.prepend(svg);}
-  const base=original.offsetTop+original.offsetHeight/2,left=scroll.scrollLeft;
-  svg.style.left=left+'px';svg.style.width=width+'px';svg.style.height=track.offsetHeight+'px';svg.setAttribute('viewBox','0 0 '+width+' '+track.offsetHeight);
-  let d='';for(let x=-20;x<=width+20;x+=12)d+=(d?'L':'M')+x+' '+(base+rise(x,width)).toFixed(2);
-  svg.querySelector('.pixel-rail-halo').setAttribute('d',d);svg.querySelector('.pixel-rail-past').setAttribute('d',d);
-  const today=track.querySelector(':scope > .today-marker'),todayX=today?today.offsetLeft-left:width;
-  let future='';if(todayX<width)for(let x=Math.max(0,todayX);x<=width+20;x+=12)future+=(future?'L':'M')+x.toFixed(2)+' '+(base+rise(x,width)).toFixed(2);
-  svg.querySelector('.pixel-rail-future').setAttribute('d',future);track.dataset.pixelCurved='true';
-  for(const node of track.children){if(!node.matches('.visual-node,.axis-date,.event-anchor,.node-connector,.today-marker'))continue;const x=node.offsetLeft+node.offsetWidth/2-left;node.style.setProperty('--orbit-rise',x>=-100&&x<=width+100?rise(x,width).toFixed(2)+'px':'0px');}
+  const key=width+':'+height+':'+base;
+  if(key!==shapeKey){svg.style.width=width+'px';svg.style.height=height+'px';svg.setAttribute('viewBox','0 0 '+width+' '+height);
+   let d='';for(let x=-20;x<=width+20;x+=12)d+=(d?'L':'M')+x+' '+(base+rise(x,width)).toFixed(2);
+   svg.querySelector('.pixel-rail-halo').setAttribute('d',d);svg.querySelector('.pixel-rail-past').setAttribute('d',d);shapeKey=key;futureKey='';
+  }
+  svg.style.left=left+'px';
+  const nextFuture=key+':'+Math.max(0,todayX).toFixed(2);
+  if(nextFuture!==futureKey){let future='';if(todayX<width)for(let x=Math.max(0,todayX);x<=width+20;x+=12)future+=(future?'L':'M')+x.toFixed(2)+' '+(base+rise(x,width)).toFixed(2);svg.querySelector('.pixel-rail-future').setAttribute('d',future);futureKey=nextFuture;}
+  if(track.dataset.pixelCurved!=='true')track.dataset.pixelCurved='true';
+  for(const [node,y]of updates)node.style.setProperty('--orbit-rise',y);
  }
- const mainObserver=new MutationObserver(records=>{if(records.some(r=>r.type==='childList'))schedule();});mainObserver.observe(root,{childList:true,subtree:true});
+ const mainObserver=new MutationObserver(records=>{if(records.some(r=>r.type==='childList'&&(r.target===root||r.target===track)&&[...r.addedNodes,...r.removedNodes].some(n=>!n.classList?.contains('pixel-rail')))){dirty=true;schedule();}});mainObserver.observe(root,{childList:true,subtree:true});
  window.addEventListener('resize',schedule);window.addEventListener('pagehide',()=>{mainObserver.disconnect();observer?.disconnect();if(frame)cancelAnimationFrame(frame);});schedule();
 })();
