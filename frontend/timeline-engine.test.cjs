@@ -25,3 +25,12 @@ test('zoom levels collapse days into weeks then months without losing events',()
  for(const scale of [36,3,.5])assert.equal([...T.groups(events,scale,start,40).values()].flat().length,4);
  assert.equal(T.groups(events,.5,start,5).get('2026-01-01').length,1);
 });
+
+test('paint windows cover the viewport plus overscan without mounting all seven logical screens',()=>{
+ for(const width of [375,1500,2560])for(const scale of [.25,.65,2,8,36,160]){
+  const center=T.index('2026-10-20')+.5,logical=T.windowFor(center,scale,width),paint=T.paintWindow(logical.start,logical.days,center,scale,width);
+  assert.ok(paint.start>=logical.start);assert.ok(paint.start+paint.days<=logical.start+logical.days);assert.ok(paint.start<=center-width/scale/2);assert.ok(paint.start+paint.days>=center+width/scale/2);
+  assert.ok(paint.days<=Math.max(4,Math.ceil(width/scale*2)));assert.ok(paint.days<logical.days);
+  for(const edge of [logical.start,logical.start+logical.days]){const p=T.paintWindow(logical.start,logical.days,edge,scale,width);assert.ok(p.start>=logical.start);assert.ok(p.start+p.days<=logical.start+logical.days);}
+ }
+});

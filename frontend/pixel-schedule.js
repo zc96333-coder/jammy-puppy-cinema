@@ -22,7 +22,8 @@
  const icon=name=>'<svg class="pixel-icon" viewBox="0 0 24 24" fill="currentColor" stroke="none" shape-rendering="crispEdges" aria-hidden="true"><path fill-rule="evenodd" d="'+(shapes[name]||shapes.other)+'"/></svg>';
  const rise=(x,width)=>-Math.min(28,width*.035)*Math.pow(Math.min(1.15,Math.abs(x-width/2)/(width/2)),2);
  // Original timeline left positions are civil-day expressions, not DOM measurements.
- const position=(left,width,scale,date=false)=>{const m=left.match(/^calc\(([-\d.]+)px \+ ([-\d.]+) \* var\(--time-scale\)/);return m?Number(m[1])+Number(m[2])*scale+(date?0:width/2):null;};
+ const positionParts=(left,width,date=false)=>{const m=left.match(/^calc\(([-\d.]+)px \+ ([-\d.]+) \* var\(--time-scale\)/);return m?{base:Number(m[1])+(date?0:width/2),day:Number(m[2])}:null;};
+ const position=(left,width,scale,date=false)=>{const p=positionParts(left,width,date);return p?p.base+p.day*scale:null;};
  window.CinemaPixel={icon,rise,position};
  if(typeof document==='undefined')return;
  const root=document.querySelector('#main');if(!root)return;
@@ -30,7 +31,8 @@
  let seed=641,stars='';const rand=()=>{seed=seed*16807%2147483647;return seed/2147483647;};
  for(let i=0;i<90;i++)stars+='<i style="left:'+(rand()*100).toFixed(2)+'%;top:'+(rand()*100).toFixed(2)+'%;opacity:'+(rand()*.35+.12).toFixed(2)+'" class="'+(i%17===0?'pixel-star-cross':'')+'"></i>';
  cosmos.innerHTML=stars+'<div class="pixel-constellation"></div><div class="pixel-moon"></div>';document.body.prepend(cosmos);
- let frame=0,scroller=null,track=null,observer=null,dirty=true,entries=[],svg=null,shapeKey='',futureKey='';
+ let frame=0,scroller=null,track=null,observer=null,dirty=true,entries=[],lastVisible=[],todayEntry=null,minBase=0,maxBase=0,svg=null,shapeKey='',futureKey='';
+ function lowerBound(day){let lo=0,hi=entries.length;while(lo<hi){const mid=(lo+hi)>>1;if(entries[mid].day<day)lo=mid+1;else hi=mid;}return lo;}
  const ns='http://www.w3.org/2000/svg';
  function schedule(){if(!frame)frame=requestAnimationFrame(paint);}
  function paint(){
@@ -42,18 +44,22 @@
   const original=track.querySelector(':scope > .single-axis');if(!original)return;
   // READ phase: finish geometry reads before changing any margin, path or size.
   const base=original.offsetTop+original.offsetHeight/2,left=scroll.scrollLeft,height=track.offsetHeight,scale=parseFloat(track.style.getPropertyValue('--time-scale'))||36;
-  if(dirty){svg=track.querySelector(':scope > .pixel-rail');shapeKey=futureKey='';entries=[];
+  if(dirty){svg=track.querySelector(':scope > .pixel-rail');shapeKey=futureKey='';entries=[];lastVisible=[];
    for(const node of track.children){if(!node.matches('.visual-node,.axis-date,.event-anchor,.node-connector,.today-marker'))continue;
     const date=node.matches('.axis-date'),nodeWidth=node.offsetWidth,formula=node.style.left;
-    entries.push({node,date,width:nodeWidth,formula,last:null,today:node.matches('.today-marker')});
-   }dirty=false;
+    const parts=positionParts(formula,nodeWidth,date)||{base:node.offsetLeft+nodeWidth/2,day:0};
+    entries.push({node,date,width:nodeWidth,...parts,last:null,today:node.matches('.today-marker')});
+   }entries.sort((a,b)=>a.day-b.day);todayEntry=entries.find(e=>e.today)||null;minBase=entries.length?Math.min(...entries.map(e=>e.base)):0;maxBase=entries.length?Math.max(...entries.map(e=>e.base)):0;dirty=false;
   }
-  const updates=[];let todayX=width;
-  for(const item of entries){const x=(position(item.formula,item.width,scale,item.date)??(item.node.offsetLeft+item.node.offsetWidth/2))-left;
+  const updates=[];let todayX=todayEntry?todayEntry.base+todayEntry.day*scale-left-todayEntry.width/2:width;
+  const visible=entries.slice(lowerBound((left-100-maxBase)/scale),lowerBound((left+width+101-minBase)/scale)),visibleSet=new Set(visible);
+  for(const item of lastVisible)if(!visibleSet.has(item)&&item.last!=='0px'){updates.push([item.node,'0px']);item.last='0px';}
+  for(const item of visible){const x=item.base+item.day*scale-left;
    if(item.today)todayX=x-item.width/2;
    const y=x>=-100&&x<=width+100?rise(x,width).toFixed(2)+'px':'0px';
    if(y!==item.last){if(item.last!==null||y!=='0px')updates.push([item.node,y]);item.last=y;}
   }
+  lastVisible=visible;
   // WRITE phase: no offset/bounds reads below this point (avoids layout per node).
   if(!svg){svg=document.createElementNS(ns,'svg');svg.classList.add('pixel-rail');svg.setAttribute('aria-hidden','true');for(const type of ['halo','past','future']){const path=document.createElementNS(ns,'path');path.setAttribute('class','pixel-rail-'+type);svg.append(path);}track.prepend(svg);}
   const key=width+':'+height+':'+base;

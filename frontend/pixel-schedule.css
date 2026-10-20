@@ -4,26 +4,30 @@
 .pixel-skip{position:fixed;top:-80px;left:16px;z-index:100;padding:12px;background:#332a20;color:#f3d5ae}.pixel-skip:focus{top:8px}
 #pixel-cosmos{display:none}
 body.pixel-theme.visual-schedule-page{--ink:#ebdfce;--muted:#b7a891;--line:#bfa17c2b;--blue:#ecc18e;--pixel-ground:#191714;--pixel-panel:#29251f;--pixel-field:#201e19;--pixel-border:#bba07d39;--pixel-orange:#f2a45f;--pixel-sage:#a6baa0;color-scheme:dark;background:var(--pixel-ground);color:var(--ink)}
+body.pixel-theme.visual-schedule-page{--pixel-screen-font:Consolas,"Microsoft YaHei UI","Microsoft YaHei",monospace;--pixel-screen-grain:repeating-linear-gradient(0deg,transparent 0 2px,#edcca408 2px 3px);--pixel-screen-glow:0 0 9px #efb67c20}
 .pixel-theme.visual-schedule-page #pixel-cosmos{display:block;position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:-1;background:radial-gradient(ellipse at 50% 35%,#7655371e,transparent 60%),radial-gradient(ellipse at 80% 90%,#6c60351b,transparent 48%)}
 #pixel-cosmos>i{position:absolute;width:2px;height:2px;background:#d2ba91}
 #pixel-cosmos>i.pixel-star-cross{width:3px;height:3px;box-shadow:4px 0 #a88e6755,-4px 0 #a88e6755,0 4px #a88e6755,0 -4px #a88e6755}
 .pixel-constellation{position:absolute;left:6%;top:25%;width:6px;height:6px;background:#8a785b60;box-shadow:36px -30px #8a785b60,76px -10px #8a785b60,112px -42px #8a785b60,148px -25px #8a785b60}
 .pixel-moon{position:absolute;right:7%;top:50%;width:27px;height:30px;background:#a48b6255;clip-path:polygon(30% 0,85% 0,85% 12%,55% 12%,55% 23%,35% 23%,35% 70%,55% 70%,55% 86%,85% 86%,85% 100%,30% 100%,30% 86%,12% 86%,12% 68%,0 68%,0 28%,12% 28%,12% 12%,30% 12%)}
-.pixel-theme.visual-schedule-page .shell-header{border-color:var(--line);background:#1917149c}
-.pixel-theme.visual-schedule-page .shell-brand{color:var(--ink);font-weight:500}.pixel-theme.visual-schedule-page .shell-brand>span{color:#edc48d}
-.pixel-theme.visual-schedule-page .shell-nav button{color:#b7a992;border-radius:5px}.pixel-theme.visual-schedule-page .shell-nav button.active{color:#f2ce9b;background:#4e3b262e;box-shadow:inset 0 -1px #bf98634d}
+.pixel-theme.visual-schedule-page .shell-header{font-family:var(--pixel-screen-font);letter-spacing:.025em;border-color:var(--line);background:var(--pixel-screen-grain),radial-gradient(ellipse at 25% 0%,#c1976020,transparent 75%),#201b17e8;box-shadow:inset 0 -1px #d5b3860a}
+.pixel-theme.visual-schedule-page .shell-brand{color:var(--ink);font-weight:400;text-shadow:var(--pixel-screen-glow)}
+.pixel-theme.visual-schedule-page .shell-brand>span{display:inline-block;width:16px;height:16px;flex:0 0 16px;font-size:0;background:#edc48d;clip-path:polygon(44% 0,56% 0,56% 25%,69% 25%,69% 37%,100% 37%,100% 56%,75% 56%,75% 69%,56% 69%,56% 100%,44% 100%,44% 75%,31% 75%,31% 56%,0 56%,0 44%,25% 44%,25% 31%,44% 31%)}
+.pixel-theme.visual-schedule-page .shell-nav button{font-family:var(--pixel-screen-font);font-weight:400;letter-spacing:.045em;color:#c6b394;border-radius:8px;text-shadow:var(--pixel-screen-glow)}.pixel-theme.visual-schedule-page .shell-nav button.active{color:#f2ce9b;background:var(--pixel-screen-grain),#bd90591a;box-shadow:inset 0 -1px #dfad7060,0 1px 7px #f0bb6b0a}
+.pixel-theme.visual-schedule-page .identity,.pixel-theme.visual-schedule-page .identity button{font-family:var(--pixel-screen-font);font-weight:400;letter-spacing:.035em;text-shadow:var(--pixel-screen-glow)}
 .pixel-theme.visual-schedule-page button:hover{background:#bda07812}
-.pixel-theme.visual-schedule-page .pixel-version{background:#28231b;color:#d0ba9b;border-color:var(--line)}
-.pixel-theme.visual-schedule-page .preview-strip{background:#201d18;color:#b3a18a}
+.pixel-theme.visual-schedule-page .pixel-version{font-family:var(--pixel-screen-font);letter-spacing:.025em;line-height:1.6;background:var(--pixel-screen-grain),#30271e;color:#d0ba9b;border-color:var(--line)}
+.pixel-theme.visual-schedule-page .preview-strip{font-family:var(--pixel-screen-font);letter-spacing:.025em;line-height:1.6;background:var(--pixel-screen-grain),#241e18;color:#c1ad91}
 .pixel-theme.visual-schedule-page .avatar{border-radius:4px;background:#443827;color:#e7be86;border:1px solid #d6ad7040}.pixel-theme.visual-schedule-page .avatar.j{background:#2e382d;color:#b5c5a8;border-color:#9aaa8840}
 .pixel-theme.visual-schedule-page :is(button,a,input,select,textarea):focus-visible{outline:2px dashed #edbf84;outline-offset:3px}
 .pixel-theme.visual-schedule-page button:disabled{opacity:.42}
 .pixel-theme.visual-schedule-page .visual-schedule{--schedule-ground:transparent;--schedule-panel:#2a251fe6;--schedule-border:#bba07d30;--schedule-field:#201e1a;--schedule-lift:0 12px 30px -15px #07060499}
 .pixel-theme.visual-schedule-page .visual-schedule .visual-scroll,.pixel-theme.visual-schedule-page .visual-schedule .visual-track{background:transparent}
-.pixel-theme.visual-schedule-page .current-date{color:var(--ink)}
-.pixel-theme.visual-schedule-page .current-date strong{font-family:Consolas,"Microsoft YaHei",monospace;font-weight:400;color:#f1dfc5;text-shadow:0 0 25px #eab67722}
-.pixel-theme.visual-schedule-page .current-date :is(span,small){color:#c5b294}
-.pixel-theme.visual-schedule-page .icon-control{color:#c7b498;border:1px solid #ae8e6130;border-radius:5px;min-width:44px;min-height:44px}
+.pixel-theme.visual-schedule-page .current-date{font-family:var(--pixel-screen-font);color:var(--ink);font-variant-numeric:tabular-nums}
+.pixel-theme.visual-schedule-page .current-date strong{font-family:var(--pixel-screen-font);font-weight:400;color:#f1dfc5;text-shadow:0 0 14px #eab6772b}
+.pixel-theme.visual-schedule-page .current-date :is(span,small){color:#cdb99a;letter-spacing:.04em;text-shadow:var(--pixel-screen-glow)}
+@supports (background-clip:text){.pixel-theme.visual-schedule-page .current-date strong{background-image:repeating-linear-gradient(0deg,#f1dfc5 0 2px,#d6bf9d 2px 3px);background-clip:text;-webkit-background-clip:text;color:transparent;-webkit-text-fill-color:transparent}}
+.pixel-theme.visual-schedule-page .icon-control{color:#d8bd99;border:1px solid #ae8e6130;border-radius:8px;min-width:44px;min-height:44px;background:var(--pixel-screen-grain),#ac815015;box-shadow:inset 0 1px #e8c29208}
 .pixel-theme.visual-schedule-page .icon-control:hover{color:var(--pixel-orange);border-color:#e4af6655;background:#b1864020}
 .pixel-theme.visual-schedule-page svg.pixel-icon{stroke:none;fill:currentColor;shape-rendering:crispEdges;border-radius:0}
 .pixel-theme.visual-schedule-page :is([data-kind=movie],[data-value=movie]){--node-color:#e9b781!important;--card-color:#e9b781!important}

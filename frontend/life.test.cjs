@@ -3,13 +3,29 @@ const {createRepository}=require('../backend/repository.cjs'),{createService}=re
 test('console flows directly from content to date with no participant controls and always saves together',async t=>{
  const h=harness(t),theme=vm.createContext({window:{}}),steps=[];vm.runInContext(fs.readFileSync(__dirname+'/pixel-console.js','utf8'),theme);
  h.context.window.CinemaConsole={channelsHTML:theme.window.CinemaConsole.channelsHTML,setChannel(){},connect(){},updateSteps:data=>steps.push(data)};
+ const attempts=[],fieldset={disabled:false},error={textContent:''};h.nodes.set('#quick-form',{querySelector:s=>s==='fieldset'?fieldset:error});h.context.captureSave=data=>attempts.push(data);h.run('mutate=async(path,method,data)=>{captureSave(data);return null;}');
  h.run('renderSchedule();LifeComposer.start()');await h.run("LifeComposer.click({dataset:{composer:'kind',value:'game'}})");
  assert.doesNotMatch(h.nodes.get('#schedule-plans').innerHTML,/data-composer-step="people"|谁一起|data-composer="people"/);
  await h.run("LifeComposer.click({dataset:{composer:'work',value:'test-game'}})");assert.equal(h.run('LifeComposer.getDraft().step'),'date');assert.equal(steps.at(-1).step,'date');
- await h.run("LifeComposer.click({dataset:{composer:'date-intent',value:'unsure'}})");assert.equal(h.run('LifeComposer.getDraft().step'),'confirm');assert.equal(steps.at(-1).dateReady,true);
- assert.doesNotMatch(h.nodes.get('#composer-summary').innerHTML,/data-value="people"|一起|puppy|jammy/);
+ await h.run("LifeComposer.click({dataset:{composer:'date-intent',value:'unsure'}})");assert.equal(h.run('LifeComposer.getDraft().step'),'date');assert.equal(attempts.length,1);assert.match(error.textContent,/未保存/);assert.equal(fieldset.disabled,false);
+ assert.doesNotMatch(h.nodes.get('#schedule-plans').innerHTML,/确认一下|data-composer-step="confirm"/);
  h.run('LifeComposer.getDraft().people=1');assert.equal(h.run('LifeComposer.payload().participants'),3);assert.equal(h.run('LifeComposer.payload().dateIntent'),'unsure');
  await h.run("LifeComposer.click({dataset:{composer:'back',value:'date'}})");await h.run("LifeComposer.click({dataset:{composer:'date-preset',value:'1'}})");assert.equal(h.run('LifeComposer.payload().date'),h.run('shift(today(),1)'));assert.equal(h.run('LifeComposer.payload().participants'),3);
+ assert.equal(attempts.length,2);
+});
+
+test('console date selection saves immediately once, preserves custom date validation and resets after success',async t=>{
+ const h=harness(t),theme=vm.createContext({window:{}});vm.runInContext(fs.readFileSync(__dirname+'/pixel-console.js','utf8'),theme);h.context.window.CinemaConsole={channelsHTML:theme.window.CinemaConsole.channelsHTML,setChannel(){},connect(){}};
+ h.run('renderSchedule();LifeComposer.start()');await h.run("LifeComposer.click({dataset:{composer:'kind',value:'other'}})");
+ h.run("LifeComposer.getDraft().values.title='测试散步'");await h.run("LifeComposer.click({dataset:{composer:'back',value:'date'}})");
+ let posts=0,validity='',release;const fieldset={disabled:false},error={textContent:''},input={value:'',reportValidity(){return !validity;},setCustomValidity(v){validity=v;}};
+ h.nodes.set('#quick-date',input);h.nodes.set('#quick-form',{querySelector:s=>s==='fieldset'?fieldset:error});
+ h.context.persist=async(path,method,data)=>{posts++;await new Promise(r=>release=r);return h.service.createEvent(data,'puppy');};h.run('mutate=persist;renderSchedule=()=>{};');
+ await h.run("LifeComposer.click({dataset:{composer:'date-save'}})");assert.equal(posts,0);
+ input.value='2026-11-01';const saving=h.run("LifeComposer.click({dataset:{composer:'date-save'}})");assert.equal(posts,1);assert.equal(fieldset.disabled,true);
+ await h.run("LifeComposer.click({dataset:{composer:'date-save'}})");assert.equal(posts,1);release();await saving;
+ assert.equal(h.run('LifeComposer.getDraft()'),null);assert.equal(fieldset.disabled,false);
+ const event=h.service.snapshot('puppy').events.find(e=>e.title==='测试散步');assert.equal(event.date,'2026-11-01');assert.equal(event.participants,3);
 });
 test('opt-in console uses fixed channels and bypasses card geometry while preserving composer state',async t=>{
  const h=harness(t),theme=vm.createContext({window:{}}),channels=[];vm.runInContext(fs.readFileSync(__dirname+'/pixel-console.js','utf8'),theme);
@@ -348,3 +364,71 @@ test('dropping a plan writes only its date and preserves plan state; cancellatio
  const saved=h.service.snapshot('puppy').events.find(x=>x.id===e.id);assert.equal(saved.date,'2026-10-02');assert.equal(saved.dateIntent,'dated');assert.equal(saved.state,'plan');assert.equal(h.run('planDrag'),null);
 });
 test('plan dragging pans at timeline edges but not outside its vertical bounds',t=>{const h=harness(t);let frames=0;h.context.requestAnimationFrame=()=>++frames;h.context.scroll={scrollLeft:200,getBoundingClientRect:()=>({left:100,right:700,width:600,top:100,bottom:400})};h.nodes.set('.visual-scroll',h.context.scroll);h.run('recycleAxisIfNeeded=()=>{};updatePlanDropTarget=()=>{};planDrag={moved:true,x:690,y:200,last:0};tickPlanDrag(100)');assert.ok(h.context.scroll.scrollLeft>200);const prior=h.context.scroll.scrollLeft;h.run('planDrag.y=500;tickPlanDrag(116)');assert.equal(h.context.scroll.scrollLeft,prior);assert.equal(frames,2);});
+
+function pixelPlanHarness(t){
+ const h=harness(t),event=h.service.createEvent({kind:'other',title:'像素拖动测试',state:'plan',dateIntent:'unsure'},'puppy'),timers=[],calls=[],children=[];
+ h.context.updated=h.service.snapshot('puppy');h.run('state=updated;renderSchedule()');
+ const classes=new Set(),card={dataset:{planId:event.id},isConnected:true,classList:{add:c=>classes.add(c),remove:c=>classes.delete(c)}},handle={dataset:{},closest:()=>card,setPointerCapture(){this.captured=true;},hasPointerCapture(){return !!this.captured;},releasePointerCapture(){this.captured=false;}};
+ const target={closest:s=>s==='.plan-main'?handle:null};
+ h.context.down={target,button:0,pointerId:9,pointerType:'mouse',clientX:300,clientY:500};
+ h.context.window.CinemaConsole={planDragUI:{hold:d=>calls.push('hold'),pick:d=>calls.push('pick'),move:d=>calls.push('move'),clear:d=>calls.push('clear'),finish:async(d,saved)=>{calls.push(saved?'land':'return');d.ghost?.remove();}}};
+ h.context.setTimeout=(fn,ms)=>{const timer={fn,ms};timers.push(timer);return timer;};h.context.clearTimeout=timer=>{if(timer)timer.canceled=true;};h.context.requestAnimationFrame=()=>1;h.context.cancelAnimationFrame=()=>{};
+ h.context.document.createElement=()=>({style:{},setAttribute(){},remove(){this.removed=true;}});h.context.document.body={append(...nodes){children.push(...nodes);}};
+ h.nodes.set('.visual-scroll',{scrollLeft:0,getBoundingClientRect:()=>({left:100,right:700,width:600,top:100,bottom:400})});h.nodes.set('.visual-track',{dataset:{start:'2026-10-01'}});h.nodes.set('.single-axis',{getBoundingClientRect:()=>({top:320})});
+ h.run('runAction=fn=>{pendingPixelDrop=fn();return pendingPixelDrop;}');
+ return {...h,event,timers,calls,children,classes,card,handle,start(){assert.equal(h.run('beginPlanDrag(down)'),true);},arm(){timers.find(timer=>timer.ms===500&&!timer.canceled).fn();}};
+}
+
+test('closing hover at press time must not replace the captured plan card or detach its animation target',t=>{
+ const h=pixelPlanHarness(t);let rebuilds=0;
+ h.context.rebuildPlans=()=>{rebuilds++;h.card.isConnected=false;};h.run('renderSchedulePlans=rebuildPlans');
+ h.context.window.CinemaConsole.planDragUI.hold=drag=>{assert.equal(drag.card.isConnected,true,'charge must be attached to the visible record');};
+ h.start();assert.equal(rebuilds,0);assert.equal(h.card.isConnected,true);
+ h.run('hideEventHover()');assert.equal(rebuilds,0,'late hover close must not replace a held record');
+ h.arm();assert.equal(h.card.isConnected,true);h.run('cancelPlanDrag();hideEventHover()');assert.equal(rebuilds,1,'ordinary hover close still refreshes plans after dragging');
+});
+
+test('pixel zoom mounts bounded labels, refreshes ahead of panning, and preserves original full-window rendering',t=>{
+ const h=harness(t),start='2020-01-01',width=1500,scroll={clientWidth:width,scrollLeft:0},track={dataset:{start,days:'1313'},innerHTML:''};
+ h.nodes.set('.visual-scroll',scroll);h.nodes.set('.visual-track',track);h.context.window.CinemaPixel={icon:()=>'<svg/>'};
+ h.run('visualScale=8');const compact=h.run("axisMarkup('2020-01-01',1313)");assert.equal((compact.match(/class=\"axis-date /g)||[]).length,375);assert.ok(compact.includes('data-quick='));
+ const oldStart=h.run('axisPaintRange.start');scroll.scrollLeft=80+800*8-width/2;h.run('refreshAxisPaint($(".visual-scroll"),$(".visual-track"))');assert.ok(h.run('axisPaintRange.start')>oldStart);assert.match(track.innerHTML,/data-quick=/);
+ h.run('visualScale=.25');const far=h.run("axisMarkup('2000-01-01',42000)");assert.ok((far.match(/class=\"axis-month /g)||[]).length<400);assert.equal(far.includes('class="axis-date '),false);
+ h.run('delete window.CinemaPixel;visualScale=8');const original=h.run("axisMarkup('2020-01-01',1313)");assert.equal((original.match(/class=\"axis-date /g)||[]).length,1313);
+});
+
+test('repeated pixel wheel zoom does not rebuild the lower plans when no hover is open',t=>{
+ const h=harness(t);h.run('renderSchedule()');h.context.window.CinemaPixel={};let rebuilds=0;h.context.rebuildPlans=()=>{rebuilds++;};h.run('renderSchedulePlans=rebuildPlans');
+ h.nodes.set('.visual-scroll',{clientWidth:1000,scrollLeft:800});h.nodes.set('.visual-track',{dataset:{start:'2026-01-01'},style:{setProperty(){}}});
+ h.run('setAxisScale=()=>{};zoomAxis(20);zoomAxis(18);zoomAxis(12)');assert.equal(rebuilds,0);
+});
+
+test('pixel whole-record long press arms after 500ms, while a short tap remains an ordinary click',t=>{
+ const h=pixelPlanHarness(t);h.start();assert.deepEqual(h.calls,['hold']);assert.equal(h.timers.at(-1).ms,500);assert.equal(h.run('planDrag.moved'),false);assert.equal(h.handle.captured,undefined);
+ h.run('endPlanDrag({pointerId:9,type:"pointerup",clientX:300,clientY:500})');assert.equal(h.run('planDrag'),null);assert.equal(h.run('planDropClickUntil'),0);h.timers.at(-1).fn();assert.equal(h.calls.includes('pick'),false);
+ h.start();h.arm();assert.equal(h.run('planDrag.moved'),true);assert.equal(h.handle.captured,true);assert.equal(h.children.length,2);assert.ok(h.calls.includes('pick'));
+ h.run('cancelPlanDrag(true)');assert.ok(h.calls.includes('return'));assert.equal(h.handle.captured,false);
+});
+
+test('movement before the hold cancels without capturing or preventing touch scrolling',t=>{
+ const h=pixelPlanHarness(t);h.context.down.pointerType='touch';h.start();h.context.move={pointerId:9,clientX:301,clientY:520,preventDefault(){assert.fail('early scrolling must not be prevented');}};
+ assert.equal(h.run('movePlanDrag(move)'),false);assert.equal(h.run('planDrag'),null);h.timers.at(-1).fn();assert.equal(h.calls.includes('pick'),false);assert.equal(h.handle.captured,undefined);
+});
+
+test('pixel release saves only date once and lands only after API success',async t=>{
+ const h=pixelPlanHarness(t);let writes=0;h.context.persistPixel=async(path,method,body)=>{writes++;return h.service.updateEvent(h.event.id,body,'puppy');};h.run('mutate=persistPixel');h.start();h.arm();
+ h.run('endPlanDrag({pointerId:9,type:"pointerup",clientX:234,clientY:200})');await h.context.pendingPixelDrop;
+ assert.equal(writes,1);assert.ok(h.calls.includes('land'));assert.equal(h.run('endPlanDrag({pointerId:9,type:"pointerup"})'),false);
+ const event=h.service.snapshot('puppy').events.find(e=>e.id===h.event.id);assert.equal(event.date,'2026-10-02');assert.equal(event.state,'plan');assert.equal(event.dateIntent,'dated');assert.equal(h.run('planDrag'),null);
+});
+
+test('cancel, invalid drop and failed saving return the parcel without changing data',async t=>{
+ for(const mode of ['pointercancel','outside','failed']){const h=pixelPlanHarness(t);let writes=0;h.context.persistPixel=async()=>{writes++;return null;};h.run('mutate=persistPixel');h.start();h.arm();
+  h.context.up={pointerId:9,type:mode==='pointercancel'?'pointercancel':'pointerup',clientX:234,clientY:mode==='outside'?500:200};h.run('endPlanDrag(up)');if(h.context.pendingPixelDrop)await h.context.pendingPixelDrop;
+  assert.equal(writes,mode==='failed'?1:0);assert.ok(h.calls.includes('return'));assert.equal(h.calls.includes('land'),false);assert.equal(h.service.snapshot('puppy').events.find(e=>e.id===h.event.id).date,'');assert.ok(h.children[0].removed);
+ }
+});
+
+test('an active pixel parcel can reveal the timeline by scrolling at the viewport edge',t=>{
+ const h=pixelPlanHarness(t),scrolls=[];h.context.window.innerHeight=600;h.context.window.scrollBy=(x,y)=>scrolls.push(y);h.start();h.arm();h.run('planDrag.y=8;tickPlanDrag(100)');assert.ok(scrolls[0]<0);h.run('planDrag.y=590;tickPlanDrag(116)');assert.ok(scrolls.at(-1)>0);h.run('cancelPlanDrag()');
+});

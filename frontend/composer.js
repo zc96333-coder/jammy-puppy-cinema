@@ -29,7 +29,7 @@ const LifeComposer=(()=>{
   if(!force&&panel.querySelector?.('#quick-form'))return;
   quickKind=draft.kind;quickDate=draft.values.date;quickPeople=draft.people;quickState=draft.state;selectedDouban=draft.link;candidateSource=draft.source;candidates=draft.results||[];
   const kind=draft.kind,options=state.works.filter(w=>w.kind===kind&&!w.deleted),v=draft.values;
-  let content=pane('category',terminal()?'<h3>选择一个通道</h3><span class="console-standby-mark" aria-hidden="true">'+visualIcon('target')+'</span>':categoryHTML());
+  let content=pane('category',terminal()?'':categoryHTML());
   if(kind){
    if(['book','game'].includes(kind))content+=pane('work','<h3>选一个'+labels[kind]+'</h3><div class="composer-choices">'+options.map(w=>button('work',esc(w.title),w.id)).join('')+button('new','＋ 新'+labels[kind])+'</div>'+button('back','‹ 返回','category'));
    content+=pane('name','<h3>'+ (kind==='movie'?'电影名？':kind==='other'?'做什么？':kind==='punishment'?'希望做什么？':'叫什么？')+'</h3><div class="form-group"><input '+(kind==='other'||kind==='punishment'?'id="event-title" name="title"':'id="new-work-title" name="workTitle"')+' maxlength="160" aria-label="名称" value="'+esc(v.title||v.workTitle||'')+'"></div>'+button('name-next','下一步')+button('back','‹ 返回',['movie','other','punishment'].includes(kind)?'category':'work'));
@@ -37,13 +37,13 @@ const LifeComposer=(()=>{
    const metadata=[['en','原名'],['year','年份'],['director',kind==='book'?'作者':kind==='game'?'开发者':'导演'],['genre','类型'],['language','语言'],['country','地区']];
    content+=pane('metadata','<h3>补哪一项？</h3><div class="composer-choices">'+metadata.map(([key,label])=>button('field',label,key)).join('')+'</div>'+button('back','‹ 返回','confirm'));
    content+=pane('field','<h3 id="composer-field-label">年份</h3>'+metadata.map(([key,label])=>'<label class="composer-meta-field" data-meta-field="'+key+'" hidden><span>'+label+'</span><input name="'+key+'" value="'+esc(v[key]||'')+'" '+(key==='year'?'type="number" min="1000" max="2100"':'maxlength="200"')+'></label>').join('')+button('field-next','继续')+button('back','‹ 返回','metadata'));
-   content+=pane('date','<h3>哪一天？</h3><div class="composer-choices">'+button('date-intent','未来','future')+button('date-intent','暂不确定','unsure')+[[-1,'昨天'],[0,'今天'],[1,'明天']].map(([n,label])=>button('date-preset',label,String(n))).join('')+'</div><input id="quick-date" name="date" aria-label="日期" type="date" value="'+esc(v.date)+'">'+button('back','确定','confirm'));
+   content+=pane('date','<h3>哪一天？</h3>'+(terminal()?'<p class="form-status">选好即保存</p>':'')+'<div class="composer-choices">'+button('date-intent','未来','future')+button('date-intent','暂不确定','unsure')+[[-1,'昨天'],[0,'今天'],[1,'明天']].map(([n,label])=>button('date-preset',label,String(n))).join('')+'</div><input id="quick-date" name="date" aria-label="日期" type="date" value="'+esc(v.date)+'">'+(terminal()?button('date-save','保存')+'<p class="form-error" role="alert"></p>':button('back','确定','confirm')));
    if(!terminal())content+=pane('people','<h3>谁一起？</h3><div class="composer-choices">'+[[3,'一起'],[1,'puppy'],[2,'jammy']].map(([n,label])=>button('people',label,String(n))).join('')+'</div>'+button('back','‹ 返回','confirm'));
    content+=pane('state','<h3>计划还是做过？</h3><div class="composer-choices">'+button('state','想做','plan')+button('state','做了','done')+'</div>'+button('back','‹ 返回','confirm'));
    content+=pane('punishment-action','<h3>惩罚</h3><div class="composer-choices">'+button('grant','获得一次机会')+'<button type="button" data-composer="demand" '+(balance(person)?'':'disabled')+'>提出要求 · 剩 '+balance(person)+' 次</button></div>'+button('back','‹ 返回','category'));
    content+=pane('owner','<h3>谁获得？</h3><div class="composer-choices">'+button('owner','puppy','puppy')+button('owner','jammy','jammy')+'</div><input name="owner" type="hidden" value="'+esc(v.owner||person)+'">'+button('back','‹ 返回','confirm'));
    content+=pane('count','<h3>几次？</h3><input name="count" type="number" min="1" max="20" step="1" value="'+esc(v.count||'1')+'">'+button('back','确定','confirm'));
-   content+=pane('confirm','<h3>确认一下</h3><div id="composer-summary"></div><p class="form-error" role="alert"></p><div class="composer-actions">'+button('back','‹ 返回',entryStep(kind))+'<button type="submit" class="dark-button">保存</button></div>');
+   if(!terminal())content+=pane('confirm','<h3>确认一下</h3><div id="composer-summary"></div><p class="form-error" role="alert"></p><div class="composer-actions">'+button('back','‹ 返回',entryStep(kind))+'<button type="submit" class="dark-button">保存</button></div>');
    content+='<input id="work-select" name="workId" type="hidden" value="'+esc(v.workId||'')+'"><input name="type" type="hidden" value="'+esc(v.type||labels[kind])+'">';
   }
   const consoleUI=terminal(),form='<form id="quick-form" data-composer-form><fieldset>'+content+'</fieldset></form>';
@@ -52,7 +52,7 @@ const LifeComposer=(()=>{
   if(kind)setStep(draft.step,false);
  }
  function setStep(step,focus=true){
-  if(terminal()){draft.people=3;quickPeople=3;if(step==='people')step='date';}
+  if(terminal()){draft.people=3;quickPeople=3;if(step==='people'||step==='confirm')step='date';}
   const panel=document.querySelector('.composer-panel'),previous=draft.step;
   panel?.getAnimations?.().forEach(a=>a.cancel());
   document.querySelectorAll('[data-composer-step]').forEach(el=>el.getAnimations?.().forEach(a=>a.cancel()));
@@ -128,14 +128,22 @@ const LifeComposer=(()=>{
    if(token===pickSequence&&isOpen())document.querySelector('[data-composer-step="'+draft.step+'"]')?.querySelector?.('input:not([type=hidden]),button')?.focus?.({preventScroll:true});
   }finally{if(token===pickSequence)choosing=false;}
  }
- async function click(b){
+ async function click(b,transitioned=false){
   if(draft?.saving)return;
   const action=b.dataset.composer,value=b.dataset.value;
+  if(!transitioned&&terminal()?.transition){
+   // Validate before an exit; invalid input must stay visible and focused.
+   let valid=true;
+   if(action==='name-next')valid=!!document.querySelector(draft?.kind==='other'||draft?.kind==='punishment'?'#event-title':'#new-work-title')?.value?.trim();
+   if(action==='date-save')valid=!!document.querySelector('#quick-date')?.value;
+   if(valid&&action!=='date-save'&&!action.startsWith('date-')&&!(action==='date-intent'&&draft?.kind==='punishment'&&draft?.action==='grant'))return terminal().transition(()=>click(b,true));
+  }
   if(action==='create')return start();
   if(action==='plans'){cancelPick();capture();searchAbort?.abort();searchSequence++;tab='plans';hideEventHover(true);return renderSchedulePlans();}
   if(choosing)return;
   if(!draft)return;
   if(action==='kind')return pickCard(b,value);
+  if(action==='date-save'&&terminal())return finishDate(true);
   if(action==='back'){if(value==='confirm'&&['date','count'].includes(draft.step)){const input=document.querySelector('[data-composer-step="'+draft.step+'"] input');if(input&&!input.reportValidity())return;if(draft.step==='date'){if(input?.value)draft.values.dateIntent='dated';draft.timingChosen=true;}}return setStep(value);}
   if(action==='work'){capture();draft.values.workId=value;document.querySelector('#work-select').value=value;return setStep(terminal()?'date':'confirm');}
   if(action==='new'){document.querySelector('#work-select').value='';draft.values.workId='';return setStep('name');}
@@ -149,14 +157,20 @@ const LifeComposer=(()=>{
   if(action==='field-next'){const input=document.querySelector('[data-meta-field="'+draft.field+'"] input');if(input&&!input.reportValidity())return;return setStep(terminal()&&!draft.timingChosen?'date':'confirm');}
   if(action==='people'){draft.people=terminal()?3:Number(value);quickPeople=draft.people;return setStep(terminal()?'date':'confirm');}
   if(action==='state'){draft.state=value;quickState=value;if(value==='done'&&!document.querySelector('#quick-date').value){document.querySelector('#quick-date').value=today();draft.values.date=today();draft.values.dateIntent='dated';}return setStep('confirm');}
-  if(action==='date-intent'){if(draft.kind==='punishment'&&draft.action==='grant')return;document.querySelector('#quick-date').value='';draft.values.date='';draft.values.dateIntent=value;draft.timingChosen=true;draft.state='plan';quickState='plan';return setStep('confirm');}
-  if(action==='date-preset'){draft.values.date=shift(today(),Number(value));document.querySelector('#quick-date').value=draft.values.date;draft.values.dateIntent='dated';draft.timingChosen=true;return setStep('confirm');}
+  if(action==='date-intent'){if(draft.kind==='punishment'&&draft.action==='grant')return;document.querySelector('#quick-date').value='';draft.values.date='';draft.values.dateIntent=value;draft.timingChosen=true;draft.state='plan';quickState='plan';return terminal()?finishDate():setStep('confirm');}
+  if(action==='date-preset'){draft.values.date=shift(today(),Number(value));document.querySelector('#quick-date').value=draft.values.date;draft.values.dateIntent='dated';draft.timingChosen=true;return terminal()?finishDate():setStep('confirm');}
   if(action==='owner'){document.querySelector('[name=owner]').value=value;return setStep('confirm');}
   if(action==='grant'){draft.action='grant';if(!document.querySelector('#quick-date').value)document.querySelector('#quick-date').value=today();draft.values.date=document.querySelector('#quick-date').value;draft.values.dateIntent='dated';return setStep(terminal()?'date':'confirm');}
   if(action==='demand'){if(!balance(person))return;draft.action='demand';draft.requestId=crypto.randomUUID();return setStep('name');}
  }
  function field(key){setStep('field');draft.field=key;document.querySelectorAll('[data-meta-field]').forEach(el=>el.hidden=el.dataset.metaField!==key);const label=document.querySelector('[data-meta-field="'+key+'"]');document.querySelector('#composer-field-label').textContent=label?.querySelector('span')?.textContent||'资料';label?.querySelector('input')?.focus();}
- function chooseSourceCandidate(index){chooseSource(index);if(candidateSource){capture();setStep(terminal()?'date':'confirm');}}
+ function chooseSourceCandidate(index,transitioned=false){if(!transitioned&&terminal()?.transition)return terminal().transition(()=>chooseSourceCandidate(index,true));chooseSource(index);if(candidateSource){capture();setStep(terminal()?'date':'confirm');}}
+ function finishDate(custom=false){
+  const input=document.querySelector('#quick-date'),form=document.querySelector('#quick-form');
+  if(custom){if(!input.value){input.setCustomValidity('请选择日期，或点未来／暂不确定');input.reportValidity();input.setCustomValidity('');return;}if(!input.reportValidity())return;draft.values.date=input.value;draft.values.dateIntent='dated';}
+  draft.timingChosen=true;
+  return save(form);
+ }
  function payload(){
   const v=draft.values;if(draft.kind==='punishment')return draft.action==='grant'?{owner:v.owner,count:Number(v.count),date:v.date}:{title:v.title,date:v.date,dateIntent:v.date?'dated':v.dateIntent||'unsure',requestId:draft.requestId};
   const data={kind:draft.kind,date:v.date,dateIntent:v.date?'dated':v.dateIntent||'unsure',participants:terminal()?3:draft.people,state:draft.state,note:''};
@@ -164,14 +178,15 @@ const LifeComposer=(()=>{
  }
  async function save(form){
   if(!draft||draft.saving||busy)return;
-  if(draft.step!=='confirm')return;capture();
+  if(terminal()?draft.step!=='date'||!draft.timingChosen:draft.step!=='confirm')return;capture();
   const needsName=!(draft.values.workId||draft.kind==='punishment'&&draft.action==='grant');
   if(needsName&&!(draft.values.workTitle||draft.values.title||'').trim())return setStep('name');
-  const data=payload(),current=draft;current.saving=true;form.querySelector('fieldset').disabled=true;
+  const data=payload(),current=draft;current.saving=true;form.querySelector('.form-error').textContent='';form.querySelector('fieldset').disabled=true;
   try{
    const path=draft.kind==='punishment'?(draft.action==='grant'?'/api/chances':'/api/demands'):'/api/events';
    const saved=await mutate(path,'POST',data,false);
    if(saved){
+    if(terminal()?.transition)await terminal().transition(()=>{});
     const panel=isOpen()?document.querySelector('.composer-panel'):null;
     if(!terminal()&&panel?.animate&&!reducedMotion()){const fold=panel.animate([{opacity:1,scale:'1',translate:'0 0'},{opacity:0,scale:'.96',translate:'0 18px'}],{duration:280,easing:'cubic-bezier(.4,0,.2,1)',fill:'forwards'});try{await fold.finished;}catch{}}
     draft=null;tab='plans';if(page==='schedule'){renderSchedule();const card=document.querySelector('[data-event="'+saved.id+'"]')?.closest?.('.schedule-plan');if(!reducedMotion())card?.animate?.([{opacity:0,translate:'0 -10px',scale:'.98'},{opacity:1,translate:'0 0',scale:'1'}],{duration:480,easing:'cubic-bezier(.16,1,.3,1)'});}

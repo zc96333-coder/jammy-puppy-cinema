@@ -31,6 +31,13 @@ test('theme preserves original animation rules and scopes styling to the new sch
  assert.match(read('server.cjs'),/'pixel-schedule.html','pixel-schedule.css','pixel-schedule.js'/);
 });
 
+test('upper labels reuse warm screen grain and crisp typography without changing axis geometry',()=>{
+ const css=read('pixel-schedule.css');assert.match(css,/--pixel-screen-font:Consolas,"Microsoft YaHei UI"/);assert.match(css,/--pixel-screen-grain:repeating-linear-gradient/);
+ for(const selector of ['.shell-header','.pixel-version','.preview-strip','.icon-control'])assert.ok(css.split(selector+'{').slice(1).some(part=>part.split('}')[0].includes('var(--pixel-screen-grain)')));
+ assert.match(css,/@supports \(background-clip:text\)/);assert.match(css,/\.current-date strong\{background-image:repeating-linear-gradient/);
+ assert.doesNotMatch(css.slice(0,css.indexOf('.pixel-theme.visual-schedule-page svg.pixel-icon')),/(?:^|[;{])filter:blur|font-smooth|image-rendering:pixelated/);assert.match(css,/min-width:44px;min-height:44px/);
+});
+
 test('civil-day expressions preserve original centers without measuring each node',()=>{
  const ctx=vm.createContext({window:{}});vm.runInContext(read('pixel-schedule.js'),ctx);const {position}=ctx.window.CinemaPixel;
  for(const scale of [.25,8,36,80,160])for(const index of [-50,.5,12.5,500]){
@@ -54,13 +61,14 @@ test('zoom batches layout reads before writes and skips offscreen/unchanged node
   querySelector(sel){return this.children.find(n=>n.matches(sel.replace(':scope > ','')))||null;}
  }
  const root=new Node('root'),scroll=new Node('scroll'),track=new Node('track'),rail=new Node('rail');scroll.className='visual-scroll';track.className='visual-track';rail.className='single-axis';rail.metrics.height=1;scroll.metrics.width=1200;scroll.scrollLeft=0;track.values['--time-scale']='36px';root.append(scroll);scroll.append(track);track.append(rail);
- for(let i=0;i<400;i++){const n=new Node('event'+i);n.className='visual-node';n.values.left='calc(62px + '+i+' * var(--time-scale))';track.append(n);}
+ for(let i=0;i<400;i++){const n=new Node('event'+i);n.className='visual-node';const formula='calc(62px + '+i+' * var(--time-scale))';n.values.left={match:pattern=>{trace.push(['parse',n.name]);return formula.match(pattern);}};track.append(n);}
  const ctx=vm.createContext({window:{addEventListener(){}},document:{querySelector:()=>root,createElement:()=>new Node(),createElementNS:()=>new Node('svg'),body:new Node()},MutationObserver:class{constructor(fn){this.fn=fn;observers.push(this);}observe(n){this.target=n;}disconnect(){}},requestAnimationFrame:f=>{frames.push(f);return 1;},cancelAnimationFrame(){}});
  vm.runInContext(read('pixel-schedule.js'),ctx);trace=[];frames.shift()();
  assert.ok(trace.filter(x=>x[0]==='write'&&x[2]==='--orbit-rise').length<45,'offscreen nodes are not written');
  const zoomObserver=observers.find(o=>o.target===track);
  track.values['--time-scale']='40px';scroll.scrollLeft=20;trace=[];zoomObserver.fn([]);frames.shift()();
  const reads=trace.filter(x=>x[0]==='read');assert.ok(reads.length<=5,'steady zoom reads viewport/rail metrics, not 400 node layouts');
+ assert.equal(trace.filter(x=>x[0]==='parse').length,0,'zoom reuses parsed civil-day coordinates instead of parsing every node again');
  const firstWrite=trace.findIndex(x=>x[0]==='write');assert.ok(firstWrite>=0);assert.ok(trace.slice(firstWrite).every(x=>x[0]!=='read'),'no forced read/write interleaving');
  trace=[];zoomObserver.fn([]);frames.shift()();assert.equal(trace.filter(x=>x[2]==='--orbit-rise').length,0,'unchanged nodes are not restyled');
  observers[0].fn([{type:'childList',target:new Node('review-editor'),addedNodes:[new Node()],removedNodes:[]}]);assert.equal(frames.length,0,'unrelated detail edits do not repaint the timeline');

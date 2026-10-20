@@ -6,6 +6,8 @@
  const density=scale=>scale>=24?'days':scale>=8?'weeks':scale>=1.8?'months':'years';
  const span=(scale,width)=>Math.max(120,Math.ceil((width||1000)/scale*7));
  function windowFor(center,scale,width){const days=span(scale,width);return {start:Math.floor(center-days/2),days};}
+ // Keep the logical seven-screen window, but mount only two screens of labels.
+ function paintWindow(start,days,center,scale,width){const size=Math.min(days,Math.max(4,Math.ceil((width||1000)/scale*2))),first=Math.max(start,Math.min(start+days-size,Math.floor(center-size/2)));return {start:first,days:size};}
  function months(start,days){
   const end=start+days,items=[];let at=start;
   while(at<end){const d=date(at),month=d.slice(0,7),first=index(month+'-01'),nextDate=new Date(first*DAY);nextDate.setUTCMonth(nextDate.getUTCMonth()+1);const next=Math.floor(nextDate.getTime()/DAY);items.push({month,start:at,length:Math.min(end,next)-at,lastDay:next-first});at=next;}
@@ -18,6 +20,6 @@
    if(!map.has(key))map.set(key,[]);map.get(key).push(event);
   }return map;
  }
- root.TimelineEngine={index,date,density,span,windowFor,months,groups};
+ root.TimelineEngine={index,date,density,span,windowFor,paintWindow,months,groups};
  if(typeof module!=='undefined')module.exports=root.TimelineEngine;
 })(typeof globalThis!=='undefined'?globalThis:this);

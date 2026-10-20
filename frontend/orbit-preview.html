@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+ <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+ <meta name="color-scheme" content="dark"><meta name="description" content="暖暗像素宇宙时间轨道视觉样机；不修改真实记录。">
+ <title>时间轨道 · jammy 和 puppy</title>
+ <link rel="stylesheet" href="orbit-preview.css">
+</head>
+<body>
+ <a class="skip" href="#orbit">跳到时间轨道</a>
+ <svg class="sprite-sheet" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"><defs>
+  <symbol id="pixel-star" viewBox="0 0 16 16"><path fill="currentColor" d="M7 1h2v4h2v2h4v2h-4v2H9v4H7v-4H5V9H1V7h4V5h2z"/><path fill="#fff0cf" d="M7 7h2v2H7z"/></symbol>
+  <symbol id="pixel-film" viewBox="0 0 20 20"><path fill="currentColor" d="M2 3h16v14H2z"/><path fill="#211d19" d="M4 5h2v2H4zm5 0h2v2H9zm5 0h2v2h-2zM4 13h2v2H4zm5 0h2v2H9zm5 0h2v2h-2zM5 9h10v2H5z"/></symbol>
+  <symbol id="pixel-book" viewBox="0 0 20 20"><path fill="currentColor" d="M2 4h6v2h4V4h6v12h-6v2H8v-2H2z"/><path fill="#211d19" d="M9 7h2v9H9zM4 7h3v1H4zm9 0h3v1h-3zM4 10h3v1H4zm9 0h3v1h-3z"/></symbol>
+  <symbol id="pixel-game" viewBox="0 0 20 20"><path fill="currentColor" d="M4 5h12v2h2v9h-4v-3H6v3H2V7h2z"/><path fill="#211d19" d="M5 7h2v2h2v2H7v2H5v-2H3V9h2zm8 1h2v2h-2zm2 3h2v2h-2z"/></symbol>
+  <symbol id="pixel-other" viewBox="0 0 20 20"><path fill="currentColor" d="M8 2h4v4h4v2h2v4h-4v2h-2v4H8v-4H6v-2H2V8h4V6h2z"/></symbol>
+  <symbol id="pixel-punishment" viewBox="0 0 20 20"><path fill="currentColor" d="M4 3h4v4h4V3h4v9h-2v4h-3v2H9v-2H6v-4H4z"/><path fill="#211d19" d="M7 9h2v2H7zm5 0h2v2h-2z"/></symbol>
+  <symbol id="pixel-astronaut" viewBox="0 0 24 28"><path fill="#a98767" d="M6 2h12v2h2v12h-2v4H6v-4H4V4h2z"/><path fill="#f1bd86" d="M7 3h10v2h2v10h-2v3H7v-3H5V5h2zM5 18h14v6h-3v4h-4v-5h-1v5H7v-4H5zM2 18h3v6H2zm17 0h3v6h-3z"/><path fill="#3a3730" d="M7 7h10v7H7z"/><path fill="#91b9ac" d="M8 8h8v4H8z"/><path fill="#e6e2b4" d="M8 8h3v2H8z"/><path fill="#b9784d" d="M8 19h8v2H8z"/></symbol>
+  <symbol id="pixel-planet" viewBox="0 0 48 32"><path fill="#6b5745" d="M18 2h12v2h4v4h2v16h-2v4h-4v2H18v-2h-4v-4h-2V8h2V4h4z"/><path fill="#a98964" d="M18 4h10v3h4v4H17V7h1z"/><path fill="#8b7053" d="M14 14h18v6H14z"/><path fill="#cba779" d="M1 21h6v-3h6v-2h8v-2h8v-2h8V9h7v2h-5v3h-8v2h-8v2h-8v2H8v3H1z"/><path fill="#372c25" d="M18 24h12v3H18z"/></symbol>
+ </defs></svg>
+ <div id="space" aria-hidden="true"></div><div class="screen-grain" aria-hidden="true"></div>
+ <header class="site-header">
+  <a class="brand" href="/#schedule"><svg aria-hidden="true"><use href="#pixel-star"/></svg><span>jammy 和 puppy 的电影院</span></a>
+  <a class="back" href="/#schedule">返回原版 <span aria-hidden="true">↗</span></a>
+ </header>
+ <main>
+  <div class="page-intro"><span class="signal"><i></i> OUR LITTLE UNIVERSE</span><span class="preview-label">视觉样机 · 不写入记录</span></div>
+  <section class="orbit-shell" aria-label="浅弧时间轨道">
+   <div class="orbit-heading"><span class="tiny-star" aria-hidden="true">✦</span><button id="today" aria-label="回到今天"><span>今天</span><strong id="today-number"></strong><small id="today-year"></small></button><span class="tiny-star" aria-hidden="true">✦</span></div>
+   <div id="orbit" tabindex="0" role="region" aria-label="时间轨道，左右拖动平移，滚轮缩放，左右方向键移动日期">
+    <svg id="rail" aria-hidden="true"><defs><linearGradient id="rail-color"><stop stop-color="#b08c68" stop-opacity=".12"/><stop offset=".5" stop-color="#e2b982" stop-opacity=".8"/><stop offset="1" stop-color="#b08c68" stop-opacity=".12"/></linearGradient></defs><path class="rail-glow"/><path class="rail-core"/><path class="rail-edge"/><path class="rail-future"/></svg>
+    <div id="dates"></div><div id="events"></div><div id="months"></div>
+    <div id="drop-preview" hidden></div>
+   </div>
+   <div class="orbit-bottom"><span id="source-status">正在读取记录…</span><span>拖动探索 <b>·</b> 滚轮缩放</span><div><button id="previous" aria-label="向过去移动">←</button><button id="next" aria-label="向未来移动">→</button></div></div>
+  </section>
+  <section class="memory-dock" aria-label="计划与记录详情">
+   <div class="dock-heading"><div><span class="eyebrow">NEXT LITTLE ADVENTURE</span><h1 id="dock-title">还想做的事</h1></div><button id="close-detail" hidden>收起 ×</button><span class="dock-crew" aria-hidden="true"><svg><use href="#pixel-astronaut"/></svg><svg><use href="#pixel-astronaut"/></svg></span></div>
+   <div id="dock-content"></div>
+   <p id="notice" role="status" aria-live="polite">计划可以拖上轨道试试；样机中的安排仅本次预览有效。</p>
+  </section>
+ </main>
+ <footer><span class="footer-pixels" aria-hidden="true">▪ · ▪</span><span>一点点记录，慢慢组成宇宙。</span><span>puppy <i>×</i> jammy</span></footer>
+ <script src="timeline-engine.js"></script><script src="orbit-geometry.js"></script><script src="orbit-preview.js"></script>
+</body>
+</html>

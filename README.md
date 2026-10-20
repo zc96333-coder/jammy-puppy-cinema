@@ -4,6 +4,12 @@
 
 开发交接与本次更新摘要：[Jammy 开发交接](docs/JAMMY_HANDOFF.md)。
 
+## 像素日程独立版本
+
+分支 `codex/pixel-schedule`，运行后打开 `/pixel-schedule.html#schedule`。暖暗像素宇宙、复古细扫描屏幕、分步录入与长按像素收合；共用原版 API 和真实数据库，不是测试数据副本。原版 `/` 保留，未合并到 `main`。
+
+[视觉与动效复用规范](docs/视觉风格与动效复用规范.md) · [像素版实现与排查记录](docs/像素日程整合说明.md)。旧只读美术样机位于 `/orbit-preview.html`，不具备完整编辑能力。当前没有新增 npm 或 Three.js 运行依赖。
+
 ## 本地运行
 
 需要 Node.js 24，无需 npm 依赖：
