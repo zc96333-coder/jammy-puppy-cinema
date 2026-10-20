@@ -2,10 +2,31 @@
 (()=>{
  'use strict';
  const shouldSwitch=(previous,next)=>previous!==null&&previous!==next;
- window.CinemaConsole={shouldSwitch};
+ const channelsHTML=(active,labels,artwork)=>'<nav class="console-channel-bus" aria-label="活动通道">'+['movie','book','game','other','punishment'].map(kind=>'<button type="button" class="console-channel" data-composer="kind" data-value="'+kind+'" aria-pressed="'+(kind===active)+'"><span class="console-port" aria-hidden="true">'+artwork({kind})+'</span><span>'+labels[kind]+'</span><i class="console-port-light" aria-hidden="true"></i></button>').join('')+'</nav><svg class="console-channel-link" aria-hidden="true"><path pathLength="100"/></svg>';
+ window.CinemaConsole={shouldSwitch,channelsHTML};
  if(typeof document==='undefined')return;
  const root=document.querySelector('#main');if(!root)return;
  const reduced=window.matchMedia('(prefers-reduced-motion: reduce)');
+ let linkFrame=0,linkMotion=null,workspaceMotion=null,activeChannel=null;
+ function setChannel(kind){
+  const panel=root.querySelector('[data-console]');if(!panel)return;
+  const previous=panel.dataset.channel||'';panel.dataset.channel=kind||'';activeChannel=kind;
+  panel.querySelectorAll('.console-channel').forEach(button=>button.setAttribute('aria-pressed',String(button.dataset.value===kind)));
+  if(!kind){const path=panel.querySelector('.console-channel-link path');stop(linkMotion);if(previous&&!reduced.matches)linkMotion=path?.animate?.([{opacity:1,strokeDashoffset:0},{opacity:0,strokeDashoffset:100}],{duration:160,easing:'ease-in'});return;}
+  if(!linkFrame)linkFrame=requestAnimationFrame(drawLink);
+ }
+ function drawLink(){
+  linkFrame=0;const panel=root.querySelector('[data-console]'),button=panel?.querySelector('.console-channel[aria-pressed="true"]'),workspace=panel?.querySelector('.console-workspace'),svg=panel?.querySelector('.console-channel-link');if(!button||!workspace||!svg||!activeChannel)return;
+  const box=panel.getBoundingClientRect(),port=button.getBoundingClientRect(),target=workspace.getBoundingClientRect(),horizontal=target.left>port.right;
+  const sx=(horizontal?port.right:port.left+port.width/2)-box.left,sy=(horizontal?port.top+port.height/2:port.bottom)-box.top,tx=(horizontal?target.left:target.left+target.width/2)-box.left,ty=(horizontal?target.top+36:target.top)-box.top;
+  const d=horizontal?'M'+sx+' '+sy+'H'+(sx+tx)/2+'V'+ty+'H'+tx:'M'+sx+' '+sy+'V'+(sy+ty)/2+'H'+tx+'V'+ty;
+  svg.setAttribute('viewBox','0 0 '+box.width+' '+box.height);svg.querySelector('path').setAttribute('d',d);
+ }
+ function connect(kind){
+  setChannel(kind);const panel=root.querySelector('[data-console]'),workspace=panel?.querySelector('.console-workspace'),path=panel?.querySelector('.console-channel-link path');stop(linkMotion);stop(workspaceMotion);
+  if(!reduced.matches){linkMotion=path?.animate?.([{strokeDashoffset:100,opacity:.3},{strokeDashoffset:0,opacity:1}],{duration:280,easing:'ease-out'});workspaceMotion=workspace?.animate?.([{opacity:.4,transform:'translateX(6px)'},{opacity:1,transform:'translateX(0)'}],{duration:230,easing:'cubic-bezier(.16,1,.3,1)'});}
+ }
+ Object.assign(window.CinemaConsole,{setChannel,connect});
  let frame=0,plans=null,row=null,lastMode=null,lastDetail=null,lastTab=null;
  let indicatorMotion=null,surfaceMotion=null,detailMotion=null,saveMotion=null;
  const jobs=[];
@@ -40,5 +61,6 @@
   stop(saveMotion);saveMotion=line.animate?.(reduced.matches?[{opacity:.8},{opacity:0}]:[{opacity:0,transform:'scaleX(.02)'},{opacity:1,transform:'scaleX(.45)',offset:.35},{opacity:0,transform:'scaleX(1)'}],{duration:reduced.matches?180:600,easing:'ease-out'});
  });
  if(toast)saveObserver.observe(toast,{attributes:true,attributeFilter:['class'],childList:true});
- window.addEventListener('pagehide',()=>{mainObserver.disconnect();saveObserver.disconnect();for(const job of jobs)job.disconnect();for(const motion of [indicatorMotion,surfaceMotion,detailMotion,saveMotion])stop(motion);if(frame)cancelAnimationFrame(frame);});schedule();
+ window.addEventListener('resize',()=>{if(activeChannel&&!linkFrame)linkFrame=requestAnimationFrame(drawLink);});
+ window.addEventListener('pagehide',()=>{mainObserver.disconnect();saveObserver.disconnect();for(const job of jobs)job.disconnect();for(const motion of [indicatorMotion,surfaceMotion,detailMotion,saveMotion,linkMotion,workspaceMotion])stop(motion);if(frame)cancelAnimationFrame(frame);if(linkFrame)cancelAnimationFrame(linkFrame);});schedule();
 })();

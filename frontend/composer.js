@@ -1,6 +1,7 @@
 // Inline schedule composer. References shared application functions at call time.
 const LifeComposer=(()=>{
  let tab='plans',draft=null,pickSequence=0,choosing=false;
+ const terminal=()=>typeof window!=='undefined'&&typeof window.CinemaConsole?.channelsHTML==='function'?window.CinemaConsole:null;
  const isOpen=()=>typeof page!=='undefined'&&page==='schedule'&&tab==='create';
  const tabsHTML=(count=visibleEvents().filter(e=>e.state==='plan').length)=>'<div class="composer-tabs" role="tablist" aria-label="日程下半区"><button type="button" role="tab" data-composer="plans" aria-selected="'+(tab==='plans')+'">想做的事 <small>'+count+'</small></button><button type="button" role="tab" data-composer="create" aria-selected="'+(tab==='create')+'">还想做什么 ＋</button></div>';
  function capture(){
@@ -27,7 +28,7 @@ const LifeComposer=(()=>{
   if(!force&&panel.querySelector?.('#quick-form'))return;
   quickKind=draft.kind;quickDate=draft.values.date;quickPeople=draft.people;quickState=draft.state;selectedDouban=draft.link;candidateSource=draft.source;candidates=draft.results||[];
   const kind=draft.kind,options=state.works.filter(w=>w.kind===kind&&!w.deleted),v=draft.values;
-  let content=pane('category',categoryHTML());
+  let content=pane('category',terminal()?'<h3>选择一个通道</h3><span class="console-standby-mark" aria-hidden="true">'+visualIcon('target')+'</span>':categoryHTML());
   if(kind){
    if(['book','game'].includes(kind))content+=pane('work','<h3>选一个'+labels[kind]+'</h3><div class="composer-choices">'+options.map(w=>button('work',esc(w.title),w.id)).join('')+button('new','＋ 新'+labels[kind])+'</div>'+button('back','‹ 返回','category'));
    content+=pane('name','<h3>'+ (kind==='movie'?'电影名？':kind==='other'?'做什么？':kind==='punishment'?'希望做什么？':'叫什么？')+'</h3><div class="form-group"><input '+(kind==='other'||kind==='punishment'?'id="event-title" name="title"':'id="new-work-title" name="workTitle"')+' maxlength="160" aria-label="名称" value="'+esc(v.title||v.workTitle||'')+'"></div>'+button('name-next','下一步')+button('back','‹ 返回',['movie','other','punishment'].includes(kind)?'category':'work'));
@@ -44,7 +45,8 @@ const LifeComposer=(()=>{
    content+=pane('confirm','<h3>确认一下</h3><div id="composer-summary"></div><p class="form-error" role="alert"></p><div class="composer-actions">'+button('back','‹ 返回',entryStep(kind))+'<button type="submit" class="dark-button">保存</button></div>');
    content+='<input id="work-select" name="workId" type="hidden" value="'+esc(v.workId||'')+'"><input name="type" type="hidden" value="'+esc(v.type||labels[kind])+'">';
   }
-  panel.innerHTML=tabsHTML()+'<div class="composer-panel" role="tabpanel" aria-label="还想做什么">'+(kind?'<button type="button" class="composer-kind" data-composer="back" data-value="category" aria-label="更换活动类别">'+eventArtwork({kind})+'<span>'+labels[kind]+'</span></button>':'')+'<div class="composer-progress" aria-hidden="true"><i></i><i></i><i></i></div><form id="quick-form" data-composer-form><fieldset>'+content+'</fieldset></form></div>';
+  const consoleUI=terminal(),form='<form id="quick-form" data-composer-form><fieldset>'+content+'</fieldset></form>';
+  panel.innerHTML=tabsHTML()+'<div class="composer-panel" '+(consoleUI?'data-console="true" ':'')+'role="tabpanel" aria-label="还想做什么">'+(consoleUI?consoleUI.channelsHTML(draft.step==='category'?null:kind,labels,eventArtwork):(kind?'<button type="button" class="composer-kind" data-composer="back" data-value="category" aria-label="更换活动类别">'+eventArtwork({kind})+'<span>'+labels[kind]+'</span></button>':''))+'<div class="composer-progress" aria-hidden="true"><i></i><i></i><i></i></div>'+(consoleUI?'<div class="console-workspace">'+form+'</div>':form)+'</div>';
   const container=panel.querySelector?.('.composer-panel');if(container){container.dataset.phase=draft.step==='category'?'0':draft.step==='confirm'?'2':'1';container.style?.setProperty('--card-color',colors[kind]||'#8fa4c1');}
   if(kind)setStep(draft.step,false);
  }
@@ -67,6 +69,7 @@ const LifeComposer=(()=>{
   if(step==='date')document.querySelectorAll('[data-composer="date-intent"]').forEach(b=>b.disabled=draft.kind==='punishment'&&draft.action==='grant');
   const badge=document.querySelector('.composer-kind');if(badge)badge.hidden=step==='category';
   updateTrail(panel,step);
+  terminal()?.setChannel(step==='category'?null:draft.kind);
   if(focus){
    const section=document.querySelector('[data-composer-step="'+step+'"]'),direction=step==='category'||previous==='confirm'?-1:1;
    if(!reducedMotion()){
@@ -90,6 +93,11 @@ const LifeComposer=(()=>{
   draft.step=entryStep(kind);render(document.querySelector('#schedule-plans'),true);
  }
  async function pickCard(card,kind){
+  if(terminal()){
+   if(choosing)return;choosing=true;
+   try{chooseKind(kind);setStep(draft.step,false);terminal().connect(kind);document.querySelector('[data-composer-step="'+draft.step+'"]')?.querySelector?.('input:not([type=hidden]),button')?.focus?.({preventScroll:true});}finally{choosing=false;}
+   return;
+  }
   if(choosing)return;const token=++pickSequence,current=draft;let origin=card.getBoundingClientRect?.();choosing=true;
   try{
    if(card.animate&&!reducedMotion()){
@@ -159,7 +167,7 @@ const LifeComposer=(()=>{
    const saved=await mutate(path,'POST',data,false);
    if(saved){
     const panel=isOpen()?document.querySelector('.composer-panel'):null;
-    if(panel?.animate&&!reducedMotion()){const fold=panel.animate([{opacity:1,scale:'1',translate:'0 0'},{opacity:0,scale:'.96',translate:'0 18px'}],{duration:280,easing:'cubic-bezier(.4,0,.2,1)',fill:'forwards'});try{await fold.finished;}catch{}}
+    if(!terminal()&&panel?.animate&&!reducedMotion()){const fold=panel.animate([{opacity:1,scale:'1',translate:'0 0'},{opacity:0,scale:'.96',translate:'0 18px'}],{duration:280,easing:'cubic-bezier(.4,0,.2,1)',fill:'forwards'});try{await fold.finished;}catch{}}
     draft=null;tab='plans';if(page==='schedule'){renderSchedule();const card=document.querySelector('[data-event="'+saved.id+'"]')?.closest?.('.schedule-plan');if(!reducedMotion())card?.animate?.([{opacity:0,translate:'0 -10px',scale:'.98'},{opacity:1,translate:'0 0',scale:'1'}],{duration:480,easing:'cubic-bezier(.16,1,.3,1)'});}
    }
    else if(!form.querySelector('.form-error').textContent)form.querySelector('.form-error').textContent='未保存，请重试。';

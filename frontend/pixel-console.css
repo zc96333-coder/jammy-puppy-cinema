@@ -60,3 +60,30 @@
 @media(max-width:767px){.pixel-theme.visual-schedule-page .visual-schedule .event-detail-space{padding:22px 16px;margin-top:24px}.pixel-theme.visual-schedule-page .event-detail-space .schedule-plan-list{grid-template-columns:1fr}.pixel-theme.visual-schedule-page .event-detail-space :is(.composer-panel,.day-detail-item){padding:20px 14px}.pixel-theme.visual-schedule-page .event-detail-space .movie-person-reviews{gap:14px}.pixel-theme.visual-schedule-page .event-detail-space .composer-tabs button{font-size:13px;padding:8px 10px}}
 @media(hover:none),(max-width:420px){.pixel-theme.visual-schedule-page .event-detail-space .composer-deck{height:auto}.pixel-theme.visual-schedule-page .event-detail-space .composer-deck .composer-deck-card{height:150px}}
 @media(prefers-reduced-motion:reduce){.pixel-theme.visual-schedule-page .event-detail-space .schedule-plan{transition:none}.pixel-theme.visual-schedule-page .event-detail-space .schedule-plan:hover{transform:none}}
+/* Fixed ship interfaces replace the deck only in the opt-in console composer. */
+.pixel-theme.visual-schedule-page .event-detail-space .composer-panel[data-console]{display:grid;grid-template-columns:150px minmax(0,1fr);column-gap:44px;max-width:none;margin:0;min-height:412px;padding:28px;background:linear-gradient(120deg,#7b75451c,transparent 50%),#17201699;overflow:visible}
+.console-channel-bus{display:flex;flex-direction:column;gap:10px;grid-column:1;grid-row:1/span 3;position:relative;z-index:2;align-self:start}
+.pixel-theme.visual-schedule-page .event-detail-space .console-channel{display:flex;align-items:center;gap:12px;position:relative;width:100%;min-height:60px;padding:12px;border-radius:4px;border:1px solid #b3aa6e30;background:#172015aa;color:#b6b08c;text-align:left;transition:background .15s,border-color .15s,color .15s,transform .1s}
+.console-port{display:block;flex:0 0 24px;width:24px;height:24px;transition:transform .18s ease-out}
+.console-port svg{width:100%;height:100%;display:block}
+.console-port-light{display:block;margin-left:auto;width:3px;height:10px;background:#7e896333;transition:background .15s}
+.pixel-theme.visual-schedule-page .event-detail-space .console-channel:hover,.pixel-theme.visual-schedule-page .event-detail-space .console-channel:focus-visible{border-color:#ccbf7f66;color:#efcf96;background:#69744222}
+.console-channel:hover .console-port{transform:translateY(-2px)}
+.pixel-theme.visual-schedule-page .event-detail-space .console-channel:active{transform:translateY(1px);background:#88743933}
+.pixel-theme.visual-schedule-page .event-detail-space .console-channel[aria-pressed=true]{border-color:#e4b77699;color:#f0cb8c;background:#96753d25;box-shadow:inset 2px 0 #e6b778}
+.console-channel[aria-pressed=true] .console-port-light{background:#e9bd79;box-shadow:0 0 7px #e9bd7955}
+.console-channel-link{position:absolute;inset:0;width:100%;height:100%;overflow:visible;z-index:1;pointer-events:none;color:#d9b87b}
+.console-channel-link path{stroke:currentColor;stroke-width:1;fill:none;stroke-dasharray:100;stroke-dashoffset:0;opacity:1}
+[data-console][data-channel=''] .console-channel-link path,[data-console]:not([data-channel]) .console-channel-link path{opacity:0}
+.console-workspace{grid-column:2;grid-row:1/span 3;position:relative;z-index:2;min-width:0;min-height:350px;padding:26px 28px;border:1px solid #aeb77b30;border-radius:4px;background:#0f1a0f66;box-shadow:inset 0 1px #b2c18a0a}
+.console-workspace::before{content:'';position:absolute;left:-1px;top:28px;width:2px;height:16px;background:#b3bd8133;pointer-events:none}
+[data-console][data-channel]:not([data-channel='']) .console-workspace::before{background:#e3bb7e;box-shadow:0 0 8px #e3bb7e33}
+.pixel-theme.visual-schedule-page .event-detail-space [data-console] .composer-progress{top:12px;right:16px}
+.pixel-theme.visual-schedule-page .event-detail-space [data-console] .composer-step{max-width:100%;margin:0}
+.pixel-theme.visual-schedule-page .event-detail-space [data-console] [data-composer-step=category]{min-height:290px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:22px;color:#b7b894}
+.pixel-theme.visual-schedule-page .event-detail-space [data-console] [data-composer-step=category] h3{font-size:15px;margin:0;color:#b9bc9a;letter-spacing:2px;order:2}
+.console-standby-mark{display:block;width:36px;height:36px;color:#aab48955}.console-standby-mark svg{width:100%;height:100%}
+.pixel-theme.visual-schedule-page .event-detail-space [data-console] .composer-trail{margin-bottom:20px}
+@media(max-width:767px){.pixel-theme.visual-schedule-page .event-detail-space .composer-panel[data-console]{grid-template-columns:1fr;row-gap:30px;min-height:0;padding:18px 12px}.console-channel-bus{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px;grid-row:1;grid-column:1}.pixel-theme.visual-schedule-page .event-detail-space .console-channel{min-height:78px;padding:10px 2px;flex-direction:column;gap:8px;justify-content:center;font-size:11px}.console-port{flex-basis:22px;width:22px;height:22px}.console-port-light{position:absolute;width:8px;height:2px;bottom:3px;left:calc(50% - 4px);margin:0}.console-workspace{grid-column:1;grid-row:2;padding:22px 16px;min-height:310px}.console-workspace::before{left:calc(50% - 8px);top:-1px;width:16px;height:2px}.pixel-theme.visual-schedule-page .event-detail-space [data-console] .composer-step[data-composer-step=category]{min-height:250px}}
+@media(prefers-reduced-motion:reduce){.console-port{transition:none}.console-channel:hover .console-port{transform:none}.pixel-theme.visual-schedule-page .event-detail-space .console-channel{transition:none}.pixel-theme.visual-schedule-page .event-detail-space .console-channel:active{transform:none}}
+@media(max-width:767px){.console-channel-bus{grid-template-columns:repeat(5,minmax(44px,1fr));overflow-x:auto;scrollbar-width:none}}

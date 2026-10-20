@@ -14,6 +14,12 @@ test('category-to-form never requests a second console surface expansion',()=>{
  const {shouldSwitch}=ctx.window.CinemaConsole;assert.equal(shouldSwitch(null,'plans'),false);assert.equal(shouldSwitch('plans','create'),true);assert.equal(shouldSwitch('create','create'),false);assert.equal(shouldSwitch('create','plans'),true);
  const composer=read('composer.js');assert.match(composer,/duration:540/);assert.match(composer,/One real surface, one geometry animation/);
 });
+test('five fixed channels expose real composer actions with one selected state',()=>{
+ const ctx=vm.createContext({window:{}});vm.runInContext(read('pixel-console.js'),ctx);
+ const html=ctx.window.CinemaConsole.channelsHTML('game',{movie:'电影',book:'图书',game:'游戏',other:'日常',punishment:'惩罚'},({kind})=>'<svg data-art="'+kind+'"></svg>');
+ assert.equal((html.match(/class="console-channel"/g)||[]).length,5);assert.equal((html.match(/aria-pressed="true"/g)||[]).length,1);assert.match(html,/data-value="game" aria-pressed="true"/);assert.match(html,/class="console-channel-link" aria-hidden="true"/);
+ assert.doesNotMatch(html,/composer-deck|rotate\(|scale\(/);
+});
 function consoleFixture(reduce=false){
  let frames=[],mode='plans',animations=[],observers=[];
  class Node{
@@ -28,7 +34,11 @@ function consoleFixture(reduce=false){
  const ctx=vm.createContext({window:{matchMedia:()=>({matches:reduce}),addEventListener(){}},document:{querySelector:s=>s==='#main'?root:toast,createElement:()=>new Node('decoration'),body:{classList:{contains:()=>true}}},MutationObserver:class{constructor(fn){this.fn=fn;observers.push(this);}observe(target){this.target=target;}disconnect(){}},requestAnimationFrame:f=>{frames.push(f);return 1;},cancelAnimationFrame(){}});
  vm.runInContext(read('pixel-console.js'),ctx);
  const flush=()=>{while(frames.length)frames.shift()();};flush();
- return {animations,toast,stage,flush,observers,change(next){mode=next;active.offsetLeft=next==='create'?140:0;observers.find(o=>o.target===plans).fn([]);flush();},notify(){observers.find(o=>o.target===toast).fn([]);}};
+ return {animations,toast,stage,flush,observers,api:ctx.window.CinemaConsole,
+  activateConsole(mobile=false){const previous=root.querySelector;root.querySelector=s=>s==='[data-console]'?panel:previous(s);const ports=['movie','game'].map(kind=>{const n=new Node(kind);n.dataset.value=kind;n.getBoundingClientRect=()=>({left:0,top:20,right:150,bottom:80,width:150,height:60});return n;});const workspace=new Node('workspace'),path=new Node('channel-line'),svg=new Node('channel-svg');
+   workspace.getBoundingClientRect=()=>mobile?{left:0,top:110,width:500,height:300}:{left:210,top:0,width:500,height:350};panel.getBoundingClientRect=()=>({left:0,top:0,width:750,height:400});svg.querySelector=()=>path;
+   panel.querySelectorAll=()=>ports;panel.querySelector=s=>s==='.console-workspace'?workspace:s==='.console-channel-link'?svg:s==='.console-channel-link path'?path:s==='.console-channel[aria-pressed="true"]'?ports.find(n=>n.attrs['aria-pressed']==='true'):null;return {panel,ports,path,svg};
+  },change(next){mode=next;active.offsetLeft=next==='create'?140:0;observers.find(o=>o.target===plans).fn([]);flush();},notify(){observers.find(o=>o.target===toast).fn([]);}};
 }
 test('mode changes animate once, internal steps do not replay; only saved feedback scans',()=>{
  const f=consoleFixture();assert.equal(f.animations.length,0);
@@ -41,4 +51,8 @@ test('mode changes animate once, internal steps do not replay; only saved feedba
 test('reduced motion skips panel movements and keeps a brief opacity save confirmation',()=>{
  const f=consoleFixture(true);f.change('create');f.change('plans');assert.equal(f.animations.length,0);
  f.toast.className='visible';f.toast.textContent='已保存';f.notify();assert.equal(f.animations.at(-1).options.duration,180);assert.ok(f.animations.at(-1).keyframes.every(k=>!('transform' in k)));
+});
+test('connecting a channel draws desktop or mobile routing without a surface scale animation',()=>{
+ for(const mobile of [false,true]){const f=consoleFixture(),ui=f.activateConsole(mobile);f.api.connect('game');f.flush();assert.equal(ui.panel.dataset.channel,'game');assert.equal(ui.ports.filter(p=>p.attrs['aria-pressed']==='true').length,1);assert.match(ui.path.attrs.d,/^M/);assert.ok(f.animations.some(a=>a.name==='channel-line'&&a.options.duration===280));assert.ok(f.animations.some(a=>a.name==='workspace'&&a.options.duration===230));assert.ok(f.animations.every(a=>a.keyframes.every(k=>!String(k.transform).includes('scale('))));f.api.setChannel(null);assert.equal(ui.panel.dataset.channel,'');assert.equal(f.animations.at(-1).options.duration,160);}
+ const reduced=consoleFixture(true);reduced.activateConsole();reduced.api.connect('movie');reduced.flush();assert.equal(reduced.animations.length,0);
 });
