@@ -96,6 +96,7 @@ document.addEventListener('pointerdown',finishScheduleEntrance,{capture:true});
 document.addEventListener('wheel',finishScheduleEntrance,{capture:true,passive:true});
 document.addEventListener('keydown',finishScheduleEntrance,{capture:true});
 function visualIcon(name){
+ if(typeof window!=='undefined'&&window.CinemaPixel&&page==='schedule')return window.CinemaPixel.icon(name);
  const paths={
   plus:'<path d="M12 5v14M5 12h14"/>',
   edit:'<path d="m4 16 11-11 4 4L8 20H4Zm9-9 4 4"/>',

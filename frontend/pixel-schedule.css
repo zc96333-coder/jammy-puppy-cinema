@@ -1,0 +1,116 @@
+/* Opt-in schedule theme. Keep life.css animations, geometry and hit targets. */
+.pixel-version{display:flex;justify-content:space-between;gap:16px;padding:7px 32px;font-size:11px;color:#786e60;background:#faf8f2;border-bottom:1px solid #eee9df}
+.pixel-version a{color:inherit;text-decoration:underline;text-underline-offset:3px}
+.pixel-skip{position:fixed;top:-80px;left:16px;z-index:100;padding:12px;background:#332a20;color:#f3d5ae}.pixel-skip:focus{top:8px}
+#pixel-cosmos{display:none}
+body.pixel-theme.visual-schedule-page{--ink:#ebdfce;--muted:#b7a891;--line:#bfa17c2b;--blue:#ecc18e;--pixel-ground:#191714;--pixel-panel:#29251f;--pixel-field:#201e19;--pixel-border:#bba07d39;--pixel-orange:#f2a45f;--pixel-sage:#a6baa0;color-scheme:dark;background:var(--pixel-ground);color:var(--ink)}
+.pixel-theme.visual-schedule-page #pixel-cosmos{display:block;position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:-1;background:radial-gradient(ellipse at 50% 35%,#7655371e,transparent 60%),radial-gradient(ellipse at 80% 90%,#6c60351b,transparent 48%)}
+#pixel-cosmos>i{position:absolute;width:2px;height:2px;background:#d2ba91}
+#pixel-cosmos>i.pixel-star-cross{width:3px;height:3px;box-shadow:4px 0 #a88e6755,-4px 0 #a88e6755,0 4px #a88e6755,0 -4px #a88e6755}
+.pixel-constellation{position:absolute;left:6%;top:25%;width:6px;height:6px;background:#8a785b60;box-shadow:36px -30px #8a785b60,76px -10px #8a785b60,112px -42px #8a785b60,148px -25px #8a785b60}
+.pixel-moon{position:absolute;right:7%;top:50%;width:27px;height:30px;background:#a48b6255;clip-path:polygon(30% 0,85% 0,85% 12%,55% 12%,55% 23%,35% 23%,35% 70%,55% 70%,55% 86%,85% 86%,85% 100%,30% 100%,30% 86%,12% 86%,12% 68%,0 68%,0 28%,12% 28%,12% 12%,30% 12%)}
+.pixel-theme.visual-schedule-page .shell-header{border-color:var(--line);background:#1917149c}
+.pixel-theme.visual-schedule-page .shell-brand{color:var(--ink);font-weight:500}.pixel-theme.visual-schedule-page .shell-brand>span{color:#edc48d}
+.pixel-theme.visual-schedule-page .shell-nav button{color:#b7a992;border-radius:5px}.pixel-theme.visual-schedule-page .shell-nav button.active{color:#f2ce9b;background:#4e3b262e;box-shadow:inset 0 -1px #bf98634d}
+.pixel-theme.visual-schedule-page button:hover{background:#bda07812}
+.pixel-theme.visual-schedule-page .pixel-version{background:#28231b;color:#d0ba9b;border-color:var(--line)}
+.pixel-theme.visual-schedule-page .preview-strip{background:#201d18;color:#b3a18a}
+.pixel-theme.visual-schedule-page .avatar{border-radius:4px;background:#443827;color:#e7be86;border:1px solid #d6ad7040}.pixel-theme.visual-schedule-page .avatar.j{background:#2e382d;color:#b5c5a8;border-color:#9aaa8840}
+.pixel-theme.visual-schedule-page :is(button,a,input,select,textarea):focus-visible{outline:2px dashed #edbf84;outline-offset:3px}
+.pixel-theme.visual-schedule-page button:disabled{opacity:.42}
+.pixel-theme.visual-schedule-page .visual-schedule{--schedule-ground:transparent;--schedule-panel:#2a251fe6;--schedule-border:#bba07d30;--schedule-field:#201e1a;--schedule-lift:0 12px 30px -15px #07060499}
+.pixel-theme.visual-schedule-page .current-date{color:var(--ink)}
+.pixel-theme.visual-schedule-page .current-date strong{font-family:Consolas,"Microsoft YaHei",monospace;font-weight:400;color:#f1dfc5;text-shadow:0 0 25px #eab67722}
+.pixel-theme.visual-schedule-page .current-date :is(span,small){color:#c5b294}
+.pixel-theme.visual-schedule-page .icon-control{color:#c7b498;border:1px solid #ae8e6130;border-radius:5px;min-width:44px;min-height:44px}
+.pixel-theme.visual-schedule-page .icon-control:hover{color:var(--pixel-orange);border-color:#e4af6655;background:#b1864020}
+.pixel-theme.visual-schedule-page svg.pixel-icon{stroke:none;fill:currentColor;shape-rendering:crispEdges;border-radius:0}
+.pixel-theme.visual-schedule-page :is([data-kind=movie],[data-value=movie]){--node-color:#e9b781!important;--card-color:#e9b781!important}
+.pixel-theme.visual-schedule-page :is([data-kind=book],[data-value=book]){--node-color:#a3b99d!important;--card-color:#a3b99d!important}
+.pixel-theme.visual-schedule-page :is([data-kind=game],[data-value=game]){--node-color:#d2bc7d!important;--card-color:#d2bc7d!important}
+.pixel-theme.visual-schedule-page :is([data-kind=other],[data-value=other]){--node-color:#baa4b3!important;--card-color:#baa4b3!important}
+.pixel-theme.visual-schedule-page :is([data-kind=punishment],[data-value=punishment]){--node-color:#d99b83!important;--card-color:#d99b83!important}
+.pixel-theme.visual-schedule-page .visual-schedule .visual-node{color:var(--node-color);background:transparent;border:0;box-shadow:none;border-radius:0;overflow:visible}
+.pixel-theme.visual-schedule-page .visual-schedule .visual-node:is(:hover,:focus-visible,.is-near,.is-pinned){background:transparent;box-shadow:none;outline:none}
+.pixel-theme.visual-schedule-page .visual-node>svg:not(.pin-orbit){filter:drop-shadow(0 0 7px #e9b78124);overflow:visible}
+.pixel-theme.visual-schedule-page .visual-node:is(:hover,.is-near,.is-pinned)>svg:not(.pin-orbit){filter:drop-shadow(0 0 7px #eba95866)}
+.pixel-theme.visual-schedule-page .visual-node:focus-visible{outline:2px dashed #e8bd83!important;outline-offset:5px}
+.pixel-theme.visual-schedule-page .visual-schedule .day-group.simplified-node{background:#d4b082;border:13px solid #191714;box-shadow:none;border-radius:0}
+.pixel-theme.visual-schedule-page .pin-orbit circle{stroke:#e9b67b;stroke-dasharray:2 6;stroke-width:1.4}
+.pixel-theme.visual-schedule-page .day-count{border:1px solid #b9925e88;border-radius:4px;background:#3d3023;color:#f2c58b;min-width:17px;height:17px;font-family:Consolas,monospace}
+.pixel-theme.visual-schedule-page .visual-node,.pixel-theme.visual-schedule-page .axis-date,.pixel-theme.visual-schedule-page .event-anchor,.pixel-theme.visual-schedule-page .node-connector,.pixel-theme.visual-schedule-page .today-marker{margin-top:var(--orbit-rise,0px)}
+.pixel-theme.visual-schedule-page .single-axis{background:linear-gradient(90deg,#b2967033 var(--today-x),#e3b27688 var(--today-x));height:1px}
+.pixel-theme.visual-schedule-page .visual-track[data-pixel-curved=true]>.single-axis{visibility:hidden}
+.pixel-rail{position:absolute;top:0;pointer-events:none;overflow:visible;z-index:1}
+.pixel-rail path{fill:none;stroke-linecap:round}.pixel-rail-past{stroke:#c5a06f66;stroke-width:1}.pixel-rail-future{stroke:#eac38b99;stroke-width:1.2}.pixel-rail-halo{stroke:#d3a66c;stroke-width:8;opacity:.08;filter:blur(4px)}
+.axis-ghost .pixel-rail{display:none}
+.pixel-theme.visual-schedule-page .visual-schedule .node-connector{background:linear-gradient(transparent,#ae8b5670);opacity:.4}
+.pixel-theme.visual-schedule-page .visual-schedule .event-anchor{background:#bfa57888;border-radius:1px}
+.pixel-theme.visual-schedule-page .visual-schedule .today-marker{background:var(--pixel-orange);box-shadow:0 0 14px #ebad6d80}
+.pixel-theme.visual-schedule-page .today-marker::after{border-color:#e9af6855}
+.pixel-theme.visual-schedule-page .visual-schedule .axis-tick{background:#aa9475;border-radius:0;opacity:.4}
+.pixel-theme.visual-schedule-page .axis-numeral{font-family:Consolas,monospace;color:#b7a88f}
+.pixel-theme.visual-schedule-page .visual-schedule .axis-date.is-today .axis-numeral{background:#69432833;color:#f1ba7d;border-radius:3px}
+.pixel-theme.visual-schedule-page .visual-schedule .axis-date:is(:hover,:focus-visible) .axis-numeral{color:#f6c48b}
+.pixel-theme.visual-schedule-page .visual-schedule .axis-date:is(:hover,:focus-visible) .axis-dot{background:#edb16e;box-shadow:0 0 0 4px #db9b4e1a}
+.pixel-theme.visual-schedule-page .visual-schedule .axis-month{background:#78623f24;border-radius:0;border-top:1px solid #c3a16a22;border-bottom:1px solid #c3a16a16;color:#c4af8c}
+.pixel-theme.visual-schedule-page .visual-schedule .axis-month.month-even{background:#57694d24}
+.pixel-theme.visual-schedule-page .visual-schedule .axis-month>span,.pixel-theme.visual-schedule-page .visual-schedule .axis-month small{color:#c3b18e;background:transparent}
+.pixel-theme.visual-schedule-page .visual-schedule .axis-month:hover{filter:brightness(1.2);box-shadow:inset 0 0 0 1px #d4ae6540}
+.pixel-theme.visual-schedule-page .axis-year{color:#b8a587}
+.pixel-theme.visual-schedule-page .node-titles{color:#d6c29f}.pixel-theme.visual-schedule-page .node-titles>span{letter-spacing:1px}
+.pixel-theme.visual-schedule-page .visual-schedule .event-hover-card{background:#2a241bec;border-color:#c2a16d55;border-radius:6px;box-shadow:0 10px 25px #08060477}
+.pixel-theme.visual-schedule-page .day-event-icon{color:#e5bd85;border-radius:4px}.pixel-theme.visual-schedule-page .day-event-icon:is(:hover,.active){background:#c19c6826}
+.pixel-theme.visual-schedule-page .visual-schedule .event-detail-space{background:transparent;box-shadow:none;clip-path:none;padding-bottom:48px;border-top:1px solid #b7976c24}
+.pixel-theme.visual-schedule-page .visual-schedule :is(.day-detail-item,.schedule-plan){background:var(--schedule-panel);border-color:var(--schedule-border);border-radius:6px;box-shadow:var(--schedule-lift)}
+.pixel-theme.visual-schedule-page .visual-schedule .day-detail-item.is-highlighted{background:#2b261fe6;border-color:#e0b57466;box-shadow:0 0 0 1px #d4a76912,0 16px 35px -18px #080503bb}
+.pixel-theme.visual-schedule-page .visual-schedule .schedule-plan:hover{background:#342b20}
+.pixel-theme.visual-schedule-page .visual-schedule :is(.detail-label,.detail-heading,.detail-heading button,.detail-facts,.detail-meta,.movie-meta,.movie-meta a,.plan-title small,.plans-empty,.inline-editor summary,.movie-review-form label,.review-front-heading,.rating-value output){color:#baa98e}
+.pixel-theme.visual-schedule-page .visual-schedule .movie-header .movie-meta a{color:#b5c49f}
+.pixel-theme.visual-schedule-page .plan-glyph{color:#e2ba85!important}
+.pixel-theme.visual-schedule-page :is(.plan-done,.plan-date-edit,.day-detail-edit){color:#b5c29d;background:transparent;border-radius:4px;min-width:36px;min-height:36px}
+.pixel-theme.visual-schedule-page .plan-drag-handle{color:#bca47b;min-width:28px}
+.pixel-theme.visual-schedule-page .visual-schedule :is(.movie-title-form,.detail-title){color:#efdfc5}
+.pixel-theme.visual-schedule-page .visual-schedule .day-detail-item :is(input:not([type=range]):not([type=checkbox]):not([type=hidden]),textarea,select){background:var(--schedule-field);color:#e7d6bc;border-color:#c0a57530;border-radius:4px}
+.pixel-theme.visual-schedule-page .visual-schedule .day-detail-item :is(input:not([type=range]),textarea,select):focus{background:#2d271d;border-color:#e7b97b80}
+.pixel-theme.visual-schedule-page .visual-schedule .day-detail-item .movie-title-form .title-autosize input[name=title]{background:transparent;border-color:transparent;color:#eeddc3}
+.pixel-theme.visual-schedule-page .title-autosize>.title-edit-outline{color:#edb476}
+.pixel-theme.visual-schedule-page .movie-title-form.is-title-saved .title-edit-outline,.pixel-theme.visual-schedule-page .movie-title-form.is-title-saved>button{color:#b6c99d}
+.pixel-theme.visual-schedule-page .visual-schedule .day-detail-item .own-review:focus-within{background:#31291d55}
+.pixel-theme.visual-schedule-page .movie-rating{--rating-color:#e2b57b}.pixel-theme.visual-schedule-page .movie-rating.jammy{--rating-color:#abb994}
+.pixel-theme.visual-schedule-page .movie-review-form .movie-rating .rating-range,.pixel-theme.visual-schedule-page .rating-static{background:linear-gradient(90deg,var(--rating-color) var(--rating-percent),#62533b44 var(--rating-percent))}
+.pixel-theme.visual-schedule-page .rating-visual-thumb{border-color:#2a251f;box-shadow:0 0 0 1px #bb976144,0 0 10px #c3964b33;border-radius:4px}
+.pixel-theme.visual-schedule-page .visual-schedule .day-detail-item .review-face{border-radius:5px;background:transparent}
+.pixel-theme.visual-schedule-page .visual-schedule .review-cover>button{color:#cbb28c;border-radius:5px}
+.pixel-theme.visual-schedule-page .review-cover small{color:#b5a488}.pixel-theme.visual-schedule-page .review-cover-symbol{border-radius:3px;color:#e2bb82;border-color:#b7996744}
+.pixel-theme.visual-schedule-page .visual-schedule .day-detail-item .review-cover>button:is(:hover,:focus-visible){background:#ab8c5920}
+.pixel-theme.visual-schedule-page .visual-schedule .day-detail-item .review-cover:has(.review-poster)>button:is(:hover,:focus-visible){background:transparent}
+.pixel-theme.visual-schedule-page .review-front .movie-review-note{color:#d5c4a9}
+.pixel-theme.visual-schedule-page .composer-tabs button{border-radius:4px;color:#b6a38a}.pixel-theme.visual-schedule-page .composer-tabs button[aria-selected=true]{background:#9c79412b;color:#f0c48a;box-shadow:inset 0 -1px #c79d5c66}
+.pixel-theme.visual-schedule-page .composer-panel{--card-color:#e3b980!important;border-radius:6px;background:#2b251de6;border-color:#b59a6d3b;box-shadow:0 20px 45px -25px #090503aa}
+.pixel-theme.visual-schedule-page .composer-panel[data-phase='1'],.pixel-theme.visual-schedule-page .composer-panel[data-phase='2']{background:linear-gradient(145deg,#342b20,#25231a);border-color:#b59a6d55;border-radius:6px}
+.pixel-theme.visual-schedule-page :is(.composer-step h3,.composer-title,.deck-label){color:#e5cfad}
+.pixel-theme.visual-schedule-page .composer-deck-card{background:linear-gradient(155deg,#393024,#25231c);border-color:#c6a67655;border-radius:6px;box-shadow:0 10px 22px #07050344,inset 0 1px #f8d49b12}
+.pixel-theme.visual-schedule-page :is(.deck-icon,.deck-corner){color:var(--card-color)}.pixel-theme.visual-schedule-page .deck-number{color:#b09c7c}
+.pixel-theme.visual-schedule-page .composer-panel :is(input,select,textarea){background:#1d1d18;color:#ead6b7;border-color:#b79a643d;border-radius:4px}
+.pixel-theme.visual-schedule-page .composer-panel :is(input,textarea)::placeholder{color:#ad9c80}
+.pixel-theme.visual-schedule-page .composer-panel :is(.composer-trail button,.composer-choices button,.composer-kind){color:#d3b990;background:#b79a6414;border-color:#b79a643b;border-radius:4px}
+.pixel-theme.visual-schedule-page .composer-panel :is(.composer-trail button,.composer-choices button):hover{background:#b79a6430;border-color:#d1ae6c77}
+.pixel-theme.visual-schedule-page .composer-progress i{background:#6d5d3d55;border-radius:1px}.pixel-theme.visual-schedule-page .composer-progress i:nth-child(n){border-radius:1px}
+.pixel-theme.visual-schedule-page .composer-panel[data-phase='0'] .composer-progress i:first-child,.pixel-theme.visual-schedule-page .composer-panel[data-phase='1'] .composer-progress i:nth-child(2),.pixel-theme.visual-schedule-page .composer-panel[data-phase='2'] .composer-progress i:nth-child(3){background:#e4b77a}
+.pixel-theme.visual-schedule-page :is(.dark-button,button[type=submit]){color:#241c12;background:#e6b779;border-radius:4px}.pixel-theme.visual-schedule-page :is(.dark-button,button[type=submit]):hover{background:#f2ca91}
+.pixel-theme.visual-schedule-page .dark-button:disabled{opacity:.45}
+.pixel-theme.visual-schedule-page button[type=submit]::before{content:'';display:inline-block;vertical-align:-2px;width:14px;height:14px;margin-right:7px;background:currentColor;mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill-rule='evenodd' d='M3 2h15v3h3v17H3zm3 2v6h10V4zm0 10v6h12v-6zm6-9h2v3h-2z'/%3E%3C/svg%3E") center/contain no-repeat}
+.pixel-theme.visual-schedule-page .form-error,.pixel-theme.visual-schedule-page .danger{color:#e3a28e}
+.pixel-theme.visual-schedule-page .muted,.pixel-theme.visual-schedule-page .form-status{color:#b9a78b}
+.pixel-theme.visual-schedule-page #modal{background:#29251e;color:#eadac1;border:1px solid #bea06d55;border-radius:6px;box-shadow:0 25px 80px #07040299}
+.pixel-theme.visual-schedule-page #modal::backdrop{background:#080705b8;backdrop-filter:blur(3px)}
+.pixel-theme.visual-schedule-page #modal :is(input,select,textarea){background:#1c1b16;color:#e7d3b4;border-color:#b9a07144;border-radius:4px}
+.pixel-theme.visual-schedule-page #modal :is(.candidate,.poster-option){background:#29251f;border-color:#c3a47044;color:#dec7a6;border-radius:4px}
+.pixel-theme.visual-schedule-page #modal :is(.modal-subtitle,.poster-notice,.candidate small){color:#bdab90}
+.pixel-theme.visual-schedule-page .plan-drag-ghost,.pixel-theme.visual-schedule-page .plan-drop-marker{background:#3c3021;color:#f2cb91;border-color:#d6ac6f80;border-radius:4px;box-shadow:0 8px 24px #07040266}
+.pixel-theme.visual-schedule-page .plan-drop-marker::after{background:#e3b16d}
+.pixel-theme.visual-schedule-page #toast{background:#393424;color:#e1d4a9;border:1px solid #b8b47c55;border-radius:4px}
+.pixel-theme.visual-schedule-page .visual-scroll.is-flying .day-group{background:transparent}
+@media(max-width:767px){.pixel-version{padding:7px 16px;font-size:10px;align-items:flex-start}.pixel-version span{max-width:75%}.pixel-theme.visual-schedule-page .visual-schedule .icon-control{min-width:40px;min-height:40px}}
+@media(prefers-reduced-motion:reduce){.pixel-theme.visual-schedule-page .pixel-rail-halo{filter:none}}
