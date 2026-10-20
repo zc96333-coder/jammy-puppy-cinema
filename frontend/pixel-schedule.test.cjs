@@ -26,5 +26,7 @@ test('theme preserves original animation rules and scopes styling to the new sch
  assert.doesNotMatch(css,/animation:\s*none|transition:\s*none|\.review-flip-inner\s*\{|\.visual-node[^{}]*\{[^{}]*transform:/);
  assert.match(css,/\.pixel-theme\.visual-schedule-page \.visual-schedule \.visual-node\{[^}]*background:transparent;[^}]*border:0;[^}]*box-shadow:none/);
  assert.match(css,/focus-visible/);assert.match(css,/prefers-reduced-motion/);assert.match(css,/button\[type=submit\]::before/);
+ assert.match(css,/\.pixel-theme\.visual-schedule-page \.visual-schedule \.visual-scroll,\.pixel-theme\.visual-schedule-page \.visual-schedule \.visual-track\{background:transparent\}/,'the white original viewport is explicitly overridden');
+ assert.match(css,/\.pixel-theme\.visual-schedule-page \.visual-schedule \.axis-date\.is-future \.axis-numeral\{color:#d6b181\}/,'future dates must not inherit original blue');
  assert.match(read('server.cjs'),/'pixel-schedule.html','pixel-schedule.css','pixel-schedule.js'/);
 });

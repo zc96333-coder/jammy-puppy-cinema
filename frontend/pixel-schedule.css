@@ -19,6 +19,7 @@ body.pixel-theme.visual-schedule-page{--ink:#ebdfce;--muted:#b7a891;--line:#bfa1
 .pixel-theme.visual-schedule-page :is(button,a,input,select,textarea):focus-visible{outline:2px dashed #edbf84;outline-offset:3px}
 .pixel-theme.visual-schedule-page button:disabled{opacity:.42}
 .pixel-theme.visual-schedule-page .visual-schedule{--schedule-ground:transparent;--schedule-panel:#2a251fe6;--schedule-border:#bba07d30;--schedule-field:#201e1a;--schedule-lift:0 12px 30px -15px #07060499}
+.pixel-theme.visual-schedule-page .visual-schedule .visual-scroll,.pixel-theme.visual-schedule-page .visual-schedule .visual-track{background:transparent}
 .pixel-theme.visual-schedule-page .current-date{color:var(--ink)}
 .pixel-theme.visual-schedule-page .current-date strong{font-family:Consolas,"Microsoft YaHei",monospace;font-weight:400;color:#f1dfc5;text-shadow:0 0 25px #eab67722}
 .pixel-theme.visual-schedule-page .current-date :is(span,small){color:#c5b294}
@@ -50,6 +51,9 @@ body.pixel-theme.visual-schedule-page{--ink:#ebdfce;--muted:#b7a891;--line:#bfa1
 .pixel-theme.visual-schedule-page .today-marker::after{border-color:#e9af6855}
 .pixel-theme.visual-schedule-page .visual-schedule .axis-tick{background:#aa9475;border-radius:0;opacity:.4}
 .pixel-theme.visual-schedule-page .axis-numeral{font-family:Consolas,monospace;color:#b7a88f}
+.pixel-theme.visual-schedule-page .visual-schedule .axis-date.is-future .axis-numeral{color:#d6b181}
+.pixel-theme.visual-schedule-page .visual-schedule .axis-date.is-future .axis-tick{background:#d8ae75}
+.pixel-theme.visual-schedule-page .visual-schedule .axis-date.is-past .axis-tick{background:#a28d70}
 .pixel-theme.visual-schedule-page .visual-schedule .axis-date.is-today .axis-numeral{background:#69432833;color:#f1ba7d;border-radius:3px}
 .pixel-theme.visual-schedule-page .visual-schedule .axis-date:is(:hover,:focus-visible) .axis-numeral{color:#f6c48b}
 .pixel-theme.visual-schedule-page .visual-schedule .axis-date:is(:hover,:focus-visible) .axis-dot{background:#edb16e;box-shadow:0 0 0 4px #db9b4e1a}
