@@ -1,0 +1,62 @@
+/* Spaceship console: lower section only. Original timeline/flip/deck logic stays. */
+.pixel-theme.visual-schedule-page .visual-schedule .event-detail-space{
+ --console-edge:#d8b47d52;--console-text:#ead9ba;--console-muted:#b9aa8d;
+ position:relative;isolation:isolate;max-width:1280px;margin:30px auto 0;padding:26px 28px 30px;
+ background:linear-gradient(155deg,#4d46312b,#23291f22 55%,#a57e3b0c),#24251e9c;
+ border:1px solid #b39a6a2e;border-radius:8px;box-shadow:0 28px 65px -24px #070703cc,inset 0 1px #f5d39a12;
+ backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);clip-path:none;
+}
+.pixel-theme.visual-schedule-page .event-detail-space::before{content:'';position:absolute;inset:-1px;z-index:-1;border-radius:inherit;padding:1px;pointer-events:none;background:linear-gradient(125deg,#efd29e66,transparent 25%,#b8c39c26 65%,#d2a46540);mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);mask-composite:exclude;-webkit-mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);-webkit-mask-composite:xor}
+.pixel-theme.visual-schedule-page .event-detail-space::after{content:'';position:absolute;inset:8px;pointer-events:none;border-radius:2px;background:linear-gradient(#d6b57b88,#d6b57b88) left top/15px 1px no-repeat,linear-gradient(#d6b57b88,#d6b57b88) left top/1px 15px no-repeat,linear-gradient(#c1bd8d66,#c1bd8d66) right bottom/15px 1px no-repeat,linear-gradient(#c1bd8d66,#c1bd8d66) right bottom/1px 15px no-repeat}
+.pixel-theme.visual-schedule-page .event-detail-space :is(#schedule-plans,#event-detail-row){position:relative;z-index:1;padding-left:0;padding-right:0}
+.pixel-theme.visual-schedule-page .event-detail-space .composer-tabs{position:relative;display:inline-flex;gap:6px;padding:0 0 10px;margin:0 0 24px;border-bottom:1px solid #c1a67424}
+.pixel-theme.visual-schedule-page .event-detail-space .composer-tabs button{position:relative;min-height:40px;padding:8px 14px;color:#b9aa8d;border-radius:3px;background:transparent;box-shadow:none;transition:color .18s,background .18s}
+.pixel-theme.visual-schedule-page .event-detail-space .composer-tabs button[aria-selected=true]{color:#f1cb8b;background:#ac8a4a13;box-shadow:none}
+.console-mode-indicator{position:absolute;bottom:-1px;height:2px;pointer-events:none;background:#e3b574;box-shadow:0 0 10px #e7b57344;transform-origin:left center}
+.pixel-theme.visual-schedule-page .event-detail-space .schedule-plan-list{grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.pixel-theme.visual-schedule-page .event-detail-space .schedule-plan{position:relative;min-height:84px;padding:10px 12px;border:1px solid #b2a47732;border-radius:5px;background:linear-gradient(125deg,#b29b5e0d,transparent 60%),#26292080;box-shadow:0 8px 20px -16px #05060399;transition:transform .22s cubic-bezier(.16,1,.3,1),border-color .18s,background .18s}
+.pixel-theme.visual-schedule-page .event-detail-space .schedule-plan::before{content:'';position:absolute;left:0;top:18px;bottom:18px;width:2px;pointer-events:none;background:#c4b07c55;transition:opacity .2s}
+.pixel-theme.visual-schedule-page .event-detail-space .schedule-plan:hover{transform:translateY(-3px);border-color:#d3b67970;background:#413a2355}
+.pixel-theme.visual-schedule-page .event-detail-space .schedule-plan:hover::before{background:#e9bc79;box-shadow:0 0 8px #e9bc7933}
+.pixel-theme.visual-schedule-page .event-detail-space .schedule-plan.is-plan-dragging{transform:scale(.98);border-style:dashed;opacity:.35}
+.pixel-theme.visual-schedule-page .event-detail-space .plan-title{font-size:15px;letter-spacing:.2px;color:#e9d8b8}.pixel-theme.visual-schedule-page .event-detail-space .plan-title small{margin-top:6px;color:#bbae8c;font-size:11px}
+.pixel-theme.visual-schedule-page .event-detail-space .plan-done{background:#9ab07710;border:1px solid #afc18c28;border-radius:3px;color:#b8c99c}
+.pixel-theme.visual-schedule-page .event-detail-space .plan-done:hover{background:#a1b17a26;border-color:#afc18c66}
+.pixel-theme.visual-schedule-page .event-detail-space .composer-panel{max-width:none;width:100%;padding:26px 30px;border-radius:5px;border-color:#b0a16c30;background:#151c1473;box-shadow:inset 0 1px #cad69f08}
+.pixel-theme.visual-schedule-page .event-detail-space .composer-panel:is([data-phase='1'],[data-phase='2']){max-width:850px;min-height:300px;margin-left:auto;margin-right:auto;background:linear-gradient(125deg,#3f3c2840,transparent 65%),#1b221acc;border-color:#bfb07a52;box-shadow:0 16px 32px -25px #050703aa,inset 0 1px #dbc78b12}
+.pixel-theme.visual-schedule-page .event-detail-space .composer-step:not([data-composer-step=category]){max-width:650px;margin:0 auto}
+.pixel-theme.visual-schedule-page .event-detail-space .composer-step h3{font-size:19px;color:#ead6b1;letter-spacing:.5px;margin-bottom:22px}
+.pixel-theme.visual-schedule-page .event-detail-space .composer-deck{height:250px}
+.pixel-theme.visual-schedule-page .event-detail-space .composer-deck .composer-deck-card{height:184px;border:1px solid #b7b17a50;border-radius:5px;color:var(--card-color);background:linear-gradient(145deg,#67613c38,transparent 48%),#22291fe8;box-shadow:0 16px 26px -14px #020501a6,inset 0 1px #e3d49c20}
+.pixel-theme.visual-schedule-page .event-detail-space .composer-deck-card::before{content:'';position:absolute;inset:7px;pointer-events:none;background:linear-gradient(currentColor,currentColor) left top/9px 1px no-repeat,linear-gradient(currentColor,currentColor) left top/1px 9px no-repeat,linear-gradient(currentColor,currentColor) right bottom/9px 1px no-repeat,linear-gradient(currentColor,currentColor) right bottom/1px 9px no-repeat;opacity:.38}
+.pixel-theme.visual-schedule-page .event-detail-space .composer-deck .composer-deck-card:is(:hover,:focus-visible){background:linear-gradient(145deg,#8c7b4155,transparent 65%),#2e3626;border-color:#e5c38999;box-shadow:0 18px 32px -14px #070803b3,inset 0 1px #e9d8a230}
+.pixel-theme.visual-schedule-page .event-detail-space .composer-deck-card[aria-pressed=true]{border-color:#efc588}
+.pixel-theme.visual-schedule-page .event-detail-space .deck-label{font-size:15px;letter-spacing:2px;color:#e4d4b3}
+.pixel-theme.visual-schedule-page .event-detail-space .deck-number{color:#adac7d;font-family:Consolas,monospace}
+.pixel-theme.visual-schedule-page .event-detail-space .composer-kind{padding-bottom:12px;border-bottom:1px solid #b7a66b28;border-radius:0}
+.pixel-theme.visual-schedule-page .event-detail-space :is(.composer-trail button,.composer-choices button,.composer-defaults button){border-radius:3px;background:#c6bd7710;border-color:#b3ab6d40;color:#e1d0ac;min-height:40px}
+.pixel-theme.visual-schedule-page .event-detail-space :is(.composer-trail button,.composer-choices button,.composer-defaults button):hover{background:#b7a36426;border-color:#dbc08a66}
+.pixel-theme.visual-schedule-page .event-detail-space .composer-actions{margin-top:28px;padding-top:18px;border-top:1px solid #b8a36e25}
+.pixel-theme.visual-schedule-page .event-detail-space .day-detail-item{padding:24px 26px;border:1px solid #b0a77938;border-radius:5px;background:linear-gradient(125deg,#87804d12,transparent 55%),#20271e99;box-shadow:inset 0 1px #ced1a508}
+.pixel-theme.visual-schedule-page .event-detail-space .day-detail-item.is-highlighted{background:#2730239c;border-color:#d0b88066;box-shadow:inset 0 1px #dec78d12}
+.pixel-theme.visual-schedule-page .event-detail-space .pinned-heading{color:#c8ba92;padding-bottom:16px;border-bottom:1px solid #c8b47f22;margin-bottom:20px}
+.pixel-theme.visual-schedule-page .event-detail-space .movie-header{padding-bottom:18px;border-bottom:1px solid #b4a16e2c}
+.pixel-theme.visual-schedule-page .event-detail-space .movie-person-reviews{gap:18px;margin-top:22px}
+.pixel-theme.visual-schedule-page .event-detail-space .day-detail-item .own-review{border:1px solid #b7b17d30;border-radius:4px;background:#121c1261;padding:20px}
+.pixel-theme.visual-schedule-page .event-detail-space .day-detail-item .own-review:focus-within{background:#28331d80;border-color:#b9c68c52}
+.pixel-theme.visual-schedule-page .event-detail-space .partner-review{padding:0;border-radius:4px}
+.pixel-theme.visual-schedule-page .event-detail-space .day-detail-item .partner-review .review-face{border:1px solid #b7b17d30;border-radius:4px;background:#121c1261}
+.pixel-theme.visual-schedule-page .event-detail-space .review-cover>button{color:#d0cca1}
+.pixel-theme.visual-schedule-page .event-detail-space .review-cover-symbol{border:1px solid #d0be7c40;border-radius:3px;background:#a5b27b0c}
+.pixel-theme.visual-schedule-page .event-detail-space .movie-rating{--rating-color:#e6bb80}.pixel-theme.visual-schedule-page .event-detail-space .movie-rating.jammy{--rating-color:#afc294}
+.pixel-theme.visual-schedule-page .event-detail-space .rating-value output{font-family:Consolas,monospace;font-size:34px;color:#ead8b4}
+.pixel-theme.visual-schedule-page .event-detail-space .rating-visual-thumb{border-color:#1d281a;border-radius:3px;box-shadow:0 0 0 1px #c5b37c44,0 0 8px #e2bb6030}
+.pixel-theme.visual-schedule-page .event-detail-space .movie-review-form textarea{border-color:#b5b17d26;background:#111b1266;border-radius:3px;min-height:88px;color:#e2d5b7}
+.pixel-theme.visual-schedule-page .event-detail-space :is(.poster-picker-button,.inline-submit){border:1px solid #b2ad7740;border-radius:3px;color:#d6c89e;background:#aaad7410;min-height:36px}
+.pixel-theme.visual-schedule-page .event-detail-space .title-edit-outline{color:#e4c17d}
+.pixel-theme.visual-schedule-page .event-detail-space .movie-title-form.is-title-saved .title-edit-outline{color:#bfd09b}
+.console-save-line{position:absolute;z-index:3;left:16px;right:16px;top:0;height:2px;background:linear-gradient(90deg,#b3c394,#edc58a,#b3c394);box-shadow:0 0 12px #eac58a55;opacity:0;pointer-events:none;transform-origin:left center}
+@supports not ((backdrop-filter:blur(6px)) or (-webkit-backdrop-filter:blur(6px))){.pixel-theme.visual-schedule-page .visual-schedule .event-detail-space{background:#25271fec}}
+@media(max-width:767px){.pixel-theme.visual-schedule-page .visual-schedule .event-detail-space{padding:22px 16px;margin-top:24px}.pixel-theme.visual-schedule-page .event-detail-space .schedule-plan-list{grid-template-columns:1fr}.pixel-theme.visual-schedule-page .event-detail-space :is(.composer-panel,.day-detail-item){padding:20px 14px}.pixel-theme.visual-schedule-page .event-detail-space .movie-person-reviews{gap:14px}.pixel-theme.visual-schedule-page .event-detail-space .composer-tabs button{font-size:13px;padding:8px 10px}}
+@media(hover:none),(max-width:420px){.pixel-theme.visual-schedule-page .event-detail-space .composer-deck{height:auto}.pixel-theme.visual-schedule-page .event-detail-space .composer-deck .composer-deck-card{height:150px}}
+@media(prefers-reduced-motion:reduce){.pixel-theme.visual-schedule-page .event-detail-space .schedule-plan{transition:none}.pixel-theme.visual-schedule-page .event-detail-space .schedule-plan:hover{transform:none}}
