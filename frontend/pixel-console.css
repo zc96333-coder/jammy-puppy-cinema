@@ -1,5 +1,5 @@
 /* Warm retro display. Scope is the lower schedule only; no timeline geometry. */
-.pixel-theme.visual-schedule-page .visual-schedule .event-detail-space{
+body.pixel-theme{
  --cabin-housing:#39312bec;--cabin-screen:#201b17;--cabin-raised:#352b23;
  --cabin-edge:#b4946d38;--cabin-line:#d5b38620;--cabin-ink:#f2dfbf;
  --cabin-dim:#c2ac90;--cabin-accent:#efb67c;--cabin-ready:#ccb994;
@@ -7,6 +7,8 @@
  --screen-reading:"Microsoft YaHei UI","Microsoft YaHei",system-ui,sans-serif;
  --retro-glass:repeating-linear-gradient(0deg,transparent 0 2px,#edcca408 2px 3px),radial-gradient(ellipse at 24% -30%,#e8bf8624,transparent 64%),radial-gradient(ellipse at 50% 40%,transparent 42%,#100a0866 100%),var(--cabin-screen);
  --retro-well:inset 0 4px 12px #0c0707a0,inset 0 0 32px #100a0860,inset 1px 0 #0e090780,0 1px #e5bd8630;
+}
+.pixel-theme.visual-schedule-page .visual-schedule .event-detail-space{
  position:relative;isolation:isolate;max-width:1220px;min-height:280px;margin:32px auto 0;padding:20px;
  border:1px solid var(--cabin-edge);border-radius:24px;background:var(--cabin-housing);
  box-shadow:0 18px 40px -26px #0d0805,inset 0 1px #ebc39720,inset 0 -3px #20191560;clip-path:none;

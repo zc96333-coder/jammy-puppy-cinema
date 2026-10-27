@@ -1,5 +1,14 @@
 const test=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('node:vm');
 const read=file=>fs.readFileSync(__dirname+'/'+file,'utf8');
+
+test('all pixel routes reuse warm screen tokens without affecting original motion',()=>{
+ const css=read('pixel-schedule.css').split('/* Shared cabin theme')[1],consoleCSS=read('pixel-console.css');
+ assert.match(consoleCSS,/body\.pixel-theme\{\s*--cabin-housing/);assert.match(css,/body\.pixel-theme\{/);
+ for(const part of ['.library-table','.tools','.empty-state','.balance-panel','.demand-card','.stat-panel','.stats-bars','#modal','.column-menu'])assert.ok(css.includes(part),part);
+ assert.match(css,/background:var\(--retro-glass\)/);assert.match(css,/box-shadow:var\(--retro-well\)/);assert.match(css,/prefers-reduced-motion/);assert.match(css,/focus-visible/);
+ assert.doesNotMatch(css,/\.visual-track|\.visual-scroll|\.review-flip-inner|\.plan-drag-ghost|animation:/);
+ assert.doesNotMatch(read('index.html'),/pixel-schedule\.css|pixel-console\.css/);
+});
 test('pixel schedule reuses the full application, not the read-only prototype',()=>{
  const html=read('pixel-schedule.html'),original=read('index.html');
  for(const name of ['film-metadata.js','timeline-engine.js','composer.js','life.js']){assert.ok(html.includes('src="'+name+'"'));assert.ok(original.includes('src="'+name+'"'));}
@@ -12,7 +21,7 @@ test('pixel icon set covers content and actions with local, accessible SVGs',()=
  for(const name of ['film','game','book','gift','other','edit','save','trash','plus','check','calendar','left','right','clock','target','zoom']){
   const svg=ctx.window.CinemaPixel.icon(name);assert.match(svg,/viewBox="0 0 24 24"/);assert.match(svg,/shape-rendering="crispEdges"/);assert.match(svg,/aria-hidden="true"/);assert.match(svg,/fill="currentColor"/);assert.doesNotMatch(svg,/#undefined/);
  }
- assert.match(read('life.js'),/window\.CinemaPixel&&page==='schedule'/);
+ assert.match(read('life.js'),/window\.CinemaPixel\)return window\.CinemaPixel\.icon\(name\)/);
 });
 test('shallow arc does not warp chronological X coordinates or business state',()=>{
  const ctx=vm.createContext({window:{}});vm.runInContext(read('pixel-schedule.js'),ctx);const {rise}=ctx.window.CinemaPixel;
@@ -23,7 +32,7 @@ test('shallow arc does not warp chronological X coordinates or business state',(
 test('theme preserves original animation rules and scopes styling to the new schedule',()=>{
  const css=read('pixel-schedule.css'),original=read('life.css');
  for(const token of ['pin-dash-flow','title-dash-flow','title-save-fade','review-flip-inner','rating-visual-thumb','composer-deck','today-breathe'])assert.ok(original.includes(token));
- assert.doesNotMatch(css,/animation:\s*none|transition:\s*none|\.review-flip-inner\s*\{|\.visual-node[^{}]*\{[^{}]*transform:/);
+ assert.doesNotMatch(css.slice(0,css.indexOf('/* Shared cabin theme')),/animation:\s*none|transition:\s*none|\.review-flip-inner\s*\{|\.visual-node[^{}]*\{[^{}]*transform:/);
  assert.match(css,/\.pixel-theme\.visual-schedule-page \.visual-schedule \.visual-node\{[^}]*background:transparent;[^}]*border:0;[^}]*box-shadow:none/);
  assert.match(css,/focus-visible/);assert.match(css,/prefers-reduced-motion/);assert.match(css,/button\[type=submit\]::before/);
  assert.match(css,/\.pixel-theme\.visual-schedule-page \.visual-schedule \.visual-scroll,\.pixel-theme\.visual-schedule-page \.visual-schedule \.visual-track\{background:transparent\}/,'the white original viewport is explicitly overridden');

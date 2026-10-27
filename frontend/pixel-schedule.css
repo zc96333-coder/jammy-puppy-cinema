@@ -122,3 +122,76 @@ body.pixel-theme.visual-schedule-page{--pixel-screen-font:Consolas,"Microsoft Ya
 .pixel-theme.visual-schedule-page .visual-scroll.is-flying .day-group{background:transparent}
 @media(max-width:767px){.pixel-version{padding:7px 16px;font-size:10px;align-items:flex-start}.pixel-version span{max-width:75%}.pixel-theme.visual-schedule-page .visual-schedule .icon-control{min-width:40px;min-height:40px}}
 @media(prefers-reduced-motion:reduce){.pixel-theme.visual-schedule-page .pixel-rail-halo{filter:none}}
+
+/* Shared cabin theme. Opt-in entry only; no changes to timeline geometry or motion. */
+body.pixel-theme{--ink:#ebdfce;--muted:#b7a891;--line:#bfa17c2b;--blue:#ecc18e;--pixel-ground:#191714;--pixel-orange:#f2a45f;--pixel-screen-font:Consolas,"Microsoft YaHei UI","Microsoft YaHei",monospace;--pixel-screen-grain:repeating-linear-gradient(0deg,transparent 0 2px,#edcca408 2px 3px);--pixel-screen-glow:0 0 9px #efb67c20;color-scheme:dark;background:var(--pixel-ground);color:var(--ink)}
+.pixel-theme:not(.visual-schedule-page){font-family:var(--screen-face);font-variant-numeric:tabular-nums}
+.pixel-theme:not(.visual-schedule-page) #pixel-cosmos{display:block;position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:-1;background:radial-gradient(ellipse at 50% 35%,#7655371e,transparent 60%),radial-gradient(ellipse at 80% 90%,#6c60351b,transparent 48%)}
+.pixel-theme:not(.visual-schedule-page) .shell-header{background:var(--pixel-screen-grain),#201b17e8;border-color:var(--line);font-family:var(--screen-face)}
+.pixel-theme:not(.visual-schedule-page) .shell-brand{color:var(--ink);font-weight:400;text-shadow:var(--pixel-screen-glow)}
+.pixel-theme:not(.visual-schedule-page) .shell-brand>span{color:var(--cabin-accent)}
+.pixel-theme:not(.visual-schedule-page) .shell-nav button{color:var(--cabin-dim);border-radius:8px;letter-spacing:.045em;font-weight:400;min-height:36px;transition:background .16s,color .16s}
+.pixel-theme:not(.visual-schedule-page) .shell-nav button.active{color:#f2ce9b;background:var(--pixel-screen-grain),#bd90591a;box-shadow:inset 0 -1px #dfad7060}
+.pixel-theme:not(.visual-schedule-page) .avatar{border-radius:4px;background:#443827;color:#e7be86;border:1px solid #d6ad7040}
+.pixel-theme:not(.visual-schedule-page) .avatar.j{background:#2e382d;color:#b5c5a8;border-color:#9aaa8840}
+.pixel-theme:not(.visual-schedule-page) .pixel-version,.pixel-theme:not(.visual-schedule-page) .preview-strip{background:var(--pixel-screen-grain),#30271e;color:var(--cabin-dim);border-color:var(--line);font-family:var(--screen-face)}
+.pixel-theme:not(.visual-schedule-page) main{max-width:1440px;min-height:65dvh}
+.pixel-theme:not(.visual-schedule-page) .page-heading{align-items:center;margin-bottom:26px}
+.pixel-theme:not(.visual-schedule-page) .page-heading h1{font-weight:400;font-size:30px;letter-spacing:.035em;text-shadow:var(--pixel-screen-glow);display:flex;align-items:center;gap:14px}
+.pixel-theme:not(.visual-schedule-page) .page-heading .symbol{display:inline-flex;margin:0;color:var(--cabin-accent)}
+.pixel-theme:not(.visual-schedule-page) .page-heading .symbol svg{width:28px;height:28px}
+.pixel-theme:not(.visual-schedule-page) .page-heading p{color:var(--cabin-dim);font-size:12px;letter-spacing:.025em}
+.pixel-theme:not(.visual-schedule-page) button{transition:background .16s,color .16s,border-color .16s}
+.pixel-theme:not(.visual-schedule-page) button:hover:not(:disabled){background:#c49b6320;color:#f1d2a8}
+.pixel-theme:not(.visual-schedule-page) :is(button,input,select,textarea,a):focus-visible{outline:2px dashed #edbf84;outline-offset:3px}
+.pixel-theme:not(.visual-schedule-page) :is(input,select,textarea){background:#261f19;border:1px solid var(--cabin-edge);border-radius:8px;color:var(--cabin-ink);accent-color:var(--cabin-accent)}
+.pixel-theme :is(input,textarea)::placeholder{color:#a9977c}
+.pixel-theme:not(.visual-schedule-page) :is(.dark-button,button[type=submit]){background:#e6b779;color:#241c12;border-radius:8px;border:1px solid #f3cb9270}
+.pixel-theme:not(.visual-schedule-page) :is(.dark-button,button[type=submit]):hover:not(:disabled){background:#f2ca91;color:#241c12}
+.pixel-theme:not(.visual-schedule-page) :is(.secondary,.status-action,.segmented button){background:#b68c5718;color:var(--cabin-ink);border:1px solid var(--cabin-edge);border-radius:8px}
+.pixel-theme:not(.visual-schedule-page) :is(.chips button.active,.segmented button.active,.participant-button.active){background:#b68c572b;color:#f4cc91;border-color:#d8ab6b70}
+.pixel-theme:not(.visual-schedule-page) .tools{padding:16px;border:1px solid var(--cabin-edge);border-radius:16px 16px 0 0;background:var(--retro-glass);box-shadow:var(--retro-well);gap:8px}
+.pixel-theme:not(.visual-schedule-page) .tools :is(input,select){border:1px solid var(--cabin-edge);background:#30271e;color:var(--cabin-ink);min-height:36px}
+.pixel-theme:not(.visual-schedule-page) .chips button{border-radius:7px;color:var(--cabin-dim);min-height:36px}
+.pixel-theme:not(.visual-schedule-page) .selection-tools{padding:10px 16px;background:#30271ed9;border-inline:1px solid var(--cabin-edge);gap:8px;flex-wrap:wrap}
+.pixel-theme:not(.visual-schedule-page) .table-wrap{border:1px solid var(--cabin-edge);border-top:0;border-radius:0 0 16px 16px;background:var(--retro-glass);box-shadow:var(--retro-well);scrollbar-color:#9a7b51 #201b17}
+.pixel-theme:not(.visual-schedule-page) .library-table{color:var(--cabin-ink)}
+.pixel-theme:not(.visual-schedule-page) .library-table th{background:#342a21;color:#c9af8c;border-color:var(--cabin-edge);padding:13px 12px;letter-spacing:.025em}
+.pixel-theme:not(.visual-schedule-page) .library-table td{border-color:var(--cabin-line);padding:11px 12px;height:52px;transition:background .16s}
+.pixel-theme:not(.visual-schedule-page) .library-table tr:hover td{background:#b68c5712}
+.pixel-theme:not(.visual-schedule-page) .library-table .name-cell{font-size:14px}
+.pixel-theme:not(.visual-schedule-page) :is(.original-name,.empty-score,.tiny-button,.summary,.summary strong,.library-poster-pair small){color:var(--cabin-dim)}
+.pixel-theme:not(.visual-schedule-page) :is(.badge,.genre-text){border-radius:4px;background:#b89a7020;color:#dec49f}
+.pixel-theme:not(.visual-schedule-page) .badge.want{background:#879e791c;color:#bdcfb0}
+.pixel-theme:not(.visual-schedule-page) .badge.active{background:#bc8e4526;color:#ebc681}
+.pixel-theme:not(.visual-schedule-page) .badge.done{background:#b7a5b820;color:#d5bdce}
+.pixel-theme:not(.visual-schedule-page) :is(.empty-state,.balance-panel,.demand-card,.stat-panel,.stats-bars,.column-menu,.login-panel){border:1px solid var(--cabin-edge);border-radius:18px;background:var(--retro-glass);box-shadow:var(--retro-well);color:var(--cabin-ink)}
+.pixel-theme:not(.visual-schedule-page) .empty-state{padding:64px 24px;margin-top:12px}
+.pixel-theme:not(.visual-schedule-page) .empty-state h3{color:var(--cabin-ink);font-weight:400;margin-bottom:10px}
+.pixel-theme:not(.visual-schedule-page) .empty-state p{color:var(--cabin-dim)}
+.pixel-theme:not(.visual-schedule-page) :is(.balance-panel .number,.stat-panel strong){color:#f1ce9e;text-shadow:var(--pixel-screen-glow);font-weight:400}
+.pixel-theme:not(.visual-schedule-page) :is(.balance-panel p,.demand-card footer,.bar,.work-detail-link){color:var(--cabin-dim)}
+.pixel-theme:not(.visual-schedule-page) :is(.section-heading,h3){font-weight:400;letter-spacing:.035em}
+.pixel-theme:not(.visual-schedule-page) .stats-bars{padding:20px 16px 0;height:220px;gap:12px}
+.pixel-theme:not(.visual-schedule-page) .bar i{background:var(--pixel-screen-grain),#cda26b;border-radius:2px 2px 0 0;box-shadow:0 0 10px #efb67c12}
+.pixel-theme:not(.visual-schedule-page) .plan-row{border-color:var(--cabin-line);padding:14px 12px}
+.pixel-theme:not(.visual-schedule-page) .plan-row>span[style]{color:var(--cabin-accent)!important}
+.pixel-theme:not(.visual-schedule-page) .column-menu{z-index:5;padding:18px;background:var(--pixel-screen-grain),#30271e}
+.pixel-theme:not(.visual-schedule-page) .login-panel{padding:28px}
+.pixel-theme:not(.visual-schedule-page) .shell-footer{color:var(--cabin-dim);border-color:var(--line);gap:12px;flex-wrap:wrap}
+/* Dialogs are shared across every pixel route, but never affect the original entry. */
+.pixel-theme #modal{background:var(--retro-glass);box-shadow:var(--retro-well),0 24px 80px #08050399;color:var(--cabin-ink);border:1px solid var(--cabin-edge);border-radius:20px}
+.pixel-theme #modal::backdrop{background:#080705b8}
+.pixel-theme #modal :is(input,select,textarea){background:#261f19;color:var(--cabin-ink);border-color:var(--cabin-edge);border-radius:8px;accent-color:var(--cabin-accent)}
+.pixel-theme #modal :is(.modal-subtitle,.form-group>label,.candidate small,.metadata-grid label,.review-panel p,.review-panel .locked,details summary){color:var(--cabin-dim)}
+.pixel-theme #modal :is(.review-panel,.candidate,.poster-candidates article,.poster-candidates article>button,.poster-option,.form-footer,.record-history){border-color:var(--cabin-edge);background:#c19c6809;color:var(--cabin-ink);border-radius:9px}
+.pixel-theme #modal :is(.review-panel .rating,.work-detail-link){color:var(--cabin-accent)}
+.pixel-theme #modal textarea{font-family:var(--screen-reading);line-height:1.75;text-shadow:none}
+.pixel-theme :is(.form-error,.danger){color:#e3a28e}
+.pixel-theme .form-status{color:#b9c5a4}
+.pixel-theme:not(.visual-schedule-page) #toast{background:var(--pixel-screen-grain),#393124;color:#f2dfbf;border:1px solid var(--cabin-edge);border-radius:8px}
+.pixel-theme svg.pixel-icon{stroke:none;fill:currentColor;shape-rendering:crispEdges;border-radius:0}
+.pixel-theme:not(.visual-schedule-page) .library-poster{background:#30271e;border-color:var(--cabin-edge)}
+.pixel-theme:not(.visual-schedule-page) .library-poster svg{width:18px;height:18px}
+@media(max-width:767px){.pixel-theme:not(.visual-schedule-page) main{padding:28px 16px 40px}.pixel-theme:not(.visual-schedule-page) .page-heading{align-items:flex-start;gap:12px}.pixel-theme:not(.visual-schedule-page) .page-heading h1{font-size:25px}.pixel-theme:not(.visual-schedule-page) .library-table :is(th,td):first-child{background:#28211b}.pixel-theme:not(.visual-schedule-page) .stats-bars{gap:5px;padding-inline:10px}.pixel-theme:not(.visual-schedule-page) .tools :is(input,select){max-width:100%;min-width:0}.pixel-theme:not(.visual-schedule-page) .tools input{flex:1 1 140px}}
+@media(prefers-reduced-motion:reduce){.pixel-theme:not(.visual-schedule-page) :is(button,.library-table td){transition:none}}

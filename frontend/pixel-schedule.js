@@ -2,6 +2,7 @@
 (()=>{
  'use strict';
  const shapes={
+  chart:'M3 19h19v3H0V2h3zm3-8h3v6H6zm6-7h3v13h-3zm6 3h3v10h-3z',
   plus:'M10 3h4v7h7v4h-7v7h-4v-7H3v-4h7z',
   check:'M3 11h3v3h3v3h3v-3h3v-3h3V8h3V5h-3v3h-3v3h-3v3H9v-3H6V8H3z',
   left:'M14 3h3v3h-3v3h-3v6h3v3h3v3h-3v-3h-3v-3H8v-3H5V9h3V6h3V3z',
@@ -19,7 +20,25 @@
   save:'M3 2h15v3h3v17H3zm3 2v6h10V4zm0 10v6h12v-6zm6-9h2v3h-2z',
   other:'M8 2h8v4h4v4h3v4h-3v4h-4v4H8v-4H4v-4H1v-4h3V6h4z'
  };
- const icon=name=>'<svg class="pixel-icon" viewBox="0 0 24 24" fill="currentColor" stroke="none" shape-rendering="crispEdges" aria-hidden="true"><path fill-rule="evenodd" d="'+(shapes[name]||shapes.other)+'"/></svg>';
+ const paperShapes={
+  chart:'M3 3h2v16h17v2H3zm5 8h3v6H8zm5-7h3v13h-3zm5 4h3v9h-3z',
+  plus:'M11 4h2v7h7v2h-7v7h-2v-7H4v-2h7z',
+  trash:'M8 3h8v2h5v2H3V5h5zM5 9h14l-1 12H6zm4 2v7h2v-7zm4 0v7h2v-7z',
+  calendar:'M6 2h2v3h8V2h2v3h3v17H3V5h3zM5 10v10h14V10zm3 3h3v3H8zm5 0h3v3h-3z',
+  target:'M11 2h2v3a7 7 0 0 1 6 6h3v2h-3a7 7 0 0 1-6 6v3h-2v-3a7 7 0 0 1-6-6H2v-2h3a7 7 0 0 1 6-6zm1 5a5 5 0 1 0 0 10 5 5 0 0 0 0-10zm0 3a2 2 0 1 0 0 4 2 2 0 0 0 0-4z',
+  zoom:'M10 2a8 8 0 1 0 5 14l6 6 2-2-6-6a8 8 0 0 0-7-12zm0 2a6 6 0 1 1 0 12 6 6 0 0 1 0-12z',
+  save:'M4 3h13l4 4v14H3V3zm2 2v5h10V5zm0 9v5h12v-5zm6-8h2v3h-2z',
+  film:'M3 4h18v16H3zm3 3v2h2V7zm5 0v2h2V7zm5 0v2h2V7zM6 11v2h12v-2zm0 4v2h2v-2zm5 0v2h2v-2zm5 0v2h2v-2z',
+  book:'M3 4h7l2 2 2-2h7v16h-7l-2 2-2-2H3zm2 2v12h5l1 1V7l-2-1zm8 1v12l1-1h5V6h-5z',
+  game:'M7 6h10c3 0 5 3 5 7v4c0 3-3 4-5 1l-1-2H8l-1 2c-2 3-5 2-5-1v-4c0-4 2-7 5-7zm0 3v2H5v2h2v2h2v-2h2v-2H9V9zm9 1a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3zm3 3a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3z',
+  gift:'M12 21C3 15 1 11 3 7s6-4 9 0c3-4 7-4 9 0s0 8-9 14z',
+  other:'M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18z',
+  left:'m15 3 2 2-7 7 7 7-2 2-9-9z',right:'m9 3-2 2 7 7-7 7 2 2 9-9z',
+  check:'m3 11 2-2 5 5L19 5l2 2-11 11z',
+  edit:'m16 3 5 5-13 13H3v-5zm-1 4L6 17v1h1L17 9z',
+  clock:'M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm0 2a8 8 0 1 1 0 16 8 8 0 0 1 0-16zm-1 2h2v6h4v2h-6z'
+ };
+ const icon=name=>'<svg class="pixel-icon" viewBox="0 0 24 24" fill="currentColor" stroke="none" shape-rendering="crispEdges" aria-hidden="true"><path class="pixel-symbol" fill-rule="evenodd" d="'+(shapes[name]||shapes.other)+'"/><path class="paper-symbol" fill-rule="evenodd" d="'+(paperShapes[name]||shapes[name]||paperShapes.other)+'"/></svg>';
  const rise=(x,width)=>-Math.min(28,width*.035)*Math.pow(Math.min(1.15,Math.abs(x-width/2)/(width/2)),2);
  // Original timeline left positions are civil-day expressions, not DOM measurements.
  const positionParts=(left,width,date=false)=>{const m=left.match(/^calc\(([-\d.]+)px \+ ([-\d.]+) \* var\(--time-scale\)/);return m?{base:Number(m[1])+(date?0:width/2),day:Number(m[2])}:null;};

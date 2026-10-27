@@ -1,5 +1,15 @@
 const test=require('node:test'),assert=require('node:assert/strict'),vm=require('node:vm'),fs=require('node:fs');
 const {createRepository}=require('../backend/repository.cjs'),{createService}=require('../backend/service.cjs');
+
+test('other pixel pages retain controls and use matching pixel heading icons without writes',t=>{
+ const h=harness(t);h.context.window.CinemaPixel={icon:name=>'<svg class="pixel-icon" data-icon="'+name+'"></svg>'};
+ const before=h.service.snapshot('puppy');
+ for(const [target,icon]of [['movie','film'],['book','book'],['game','game'],['punishment','gift'],['stats','chart']]){
+  h.context.targetPage=target;h.run('page=targetPage;render()');assert.ok(h.main().includes('data-icon="'+icon+'"'));assert.match(h.main(),/page-heading/);
+ }
+ assert.deepEqual(h.service.snapshot('puppy'),before);
+ h.run("delete window.CinemaPixel;page='movie';renderLibrary()");assert.doesNotMatch(h.main(),/pixel-icon/);assert.match(h.main(),/显示列/);
+});
 test('console flows directly from content to date with no participant controls and always saves together',async t=>{
  const h=harness(t),theme=vm.createContext({window:{}}),steps=[];vm.runInContext(fs.readFileSync(__dirname+'/pixel-console.js','utf8'),theme);
  h.context.window.CinemaConsole={channelsHTML:theme.window.CinemaConsole.channelsHTML,setChannel(){},connect(){},updateSteps:data=>steps.push(data)};

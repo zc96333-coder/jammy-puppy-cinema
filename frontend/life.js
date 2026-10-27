@@ -13,7 +13,7 @@ async function refresh(renderPage=true){state=await api('/api/state');$('#sync-s
 async function mutate(path,method,body,close=true){if(busy)return;busy=true;document.querySelectorAll('#modal [type=submit]').forEach(b=>b.disabled=true);try{const result=await api(path,method,body);if(close)$('#modal').close();await refresh();toast('已保存');return result;}catch(error){const node=LifeComposer.isOpen()?$('#quick-form .form-error'):$('#modal')?.open?$('#modal .form-error'):null;if(node)node.textContent=error.message;else toast(error.message);}finally{busy=false;document.querySelectorAll('#modal [type=submit]').forEach(b=>b.disabled=false);}}
 function navigation(){document.querySelectorAll('[data-page]').forEach(b=>b.classList.toggle('active',b.dataset.page===page));$('#identity').innerHTML=`<span class="avatar ${person==='jammy'?'j':''}">${person==='jammy'?'J':'P'}</span><span>${esc(person)}</span>${preview?`<button class="tiny-button" id="switch-person">切换</button>`:`<button class="tiny-button" id="logout">退出</button>`}`;$('#preview').innerHTML=preview?'<div class="preview-strip"><span>本地预览身份 · 数据已保存到本机共享数据库</span><span>正式上线须设置 puppy / jammy 密码</span></div>':'';}
 function go(next){cancelPlanDrag();LifeComposer.leave();stopAxisMotion();stopZoomMotion();hideEventHover(true);page=next;libraryFilter='all';librarySearch='';libraryYear='all';libraryGenre='all';libraryScore='all';selectMode=false;selected.clear();showTrash=false;history.replaceState(null,'','#'+next);render();}
-function heading(symbol,title,subtitle,action=''){return `<div class="page-heading"><div><h1><span class="symbol">${symbol}</span>${title}</h1><p>${subtitle}</p></div>${action}</div>`;}
+function heading(symbol,title,subtitle,action=''){const art=window.CinemaPixel?visualIcon(({movie:'film',book:'book',game:'game',punishment:'gift',stats:'chart'})[page]||'other'):symbol;return `<div class="page-heading"><div><h1><span class="symbol" aria-hidden="true">${art}</span>${title}</h1><p>${subtitle}</p></div>${action}</div>`;}
 let eventViewState=null,eventViewCache=[];
 function visibleEvents(){
  if(eventViewState!==state){const works=new Map(state.works.map(w=>[w.id,w]));eventViewCache=state.events.filter(e=>!e.deleted&&(!e.workId||!works.get(e.workId)?.deleted)).map(e=>({...e,title:works.get(e.workId)?.title||e.title}));eventViewState=state;}
@@ -97,7 +97,7 @@ document.addEventListener('pointerdown',finishScheduleEntrance,{capture:true});
 document.addEventListener('wheel',finishScheduleEntrance,{capture:true,passive:true});
 document.addEventListener('keydown',finishScheduleEntrance,{capture:true});
 function visualIcon(name){
- if(typeof window!=='undefined'&&window.CinemaPixel&&page==='schedule')return window.CinemaPixel.icon(name);
+ if(typeof window!=='undefined'&&window.CinemaPixel)return window.CinemaPixel.icon(name);
  const paths={
   plus:'<path d="M12 5v14M5 12h14"/>',
   edit:'<path d="m4 16 11-11 4 4L8 20H4Zm9-9 4 4"/>',
